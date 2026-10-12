@@ -1,0 +1,23 @@
+# Dados Locais e Banco de Dados
+*.db
+*.sqlite
+data/
+logs/
+
+# Configurações Sensíveis
+.env
+.env.local
+config/secrets.json
+
+# Ambientes Virtuais Python
+venv/
+env/
+.venv/
+
+# Arquivos de Sistema e IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+__pycache__/
+*.pyc
