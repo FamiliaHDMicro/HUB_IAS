@@ -3,209 +3,299 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🛋️ Sala VIP | OmniHub Collaborative</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:;">
+    <title>🛋️ Sala VIP | OmniHub HDMicro</title>
     <style>
         :root { 
-            --bg: #0d1117; --card: #161b22; --text: #c9d1d9; 
-            --accent: #58a6ff; --vip-gold: #d29922; --border: #30363d;
+            --bg: #0f172a; /* Azul Escuro Profundo */
+            --panel: #1e293b; /* Painel Cinza Azulado */
+            --text: #e2e8f0; /* Texto Claro */
+            --accent: #38bdf8; /* Azul Céu (Destaque) */
+            --user-color: #4ade80; /* Verde (Usuário) */
+            --ai-qwen: #c084fc; /* Roxo (Qwen) */
+            --ai-claude: #fb923c; /* Laranja (Claude) */
+            --ai-gemini: #60a5fa; /* Azul (Gemini) */
+            --border: #334155;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
-        body { background: var(--bg); color: var(--text); height: 100vh; display: flex; overflow: hidden; }
-        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* HEADER */
+        header { 
+            background: var(--panel); padding: 15px 20px; border-bottom: 1px solid var(--border); 
+            display: flex; justify-content: space-between; align-items: center; 
+        }
+        .brand { font-size: 1.2rem; font-weight: bold; color: var(--accent); display: flex; gap: 10px; align-items: center; }
+        .status { font-size: 0.8rem; color: #94a3b8; background: rgba(56, 189, 248, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid var(--accent); }
+
+        /* CONTAINER PRINCIPAL */
+        main { flex: 1; display: flex; overflow: hidden; }
+
         /* SIDEBAR DE CONVIDADOS */
-        .sidebar { width: 260px; background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-        .vip-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-        .vip-title { font-size: 1.1rem; font-weight: bold; color: var(--vip-gold); }
-        .guest-list { flex: 1; overflow-y: auto; padding: 10px; }
-        .guest-item { padding: 12px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
-        .guest-item:hover { background: rgba(88, 166, 255, 0.1); }
-        .guest-item.active { background: rgba(210, 153, 34, 0.1); border-color: var(--vip-gold); color: var(--vip-gold); }
-        .guest-name { font-weight: 600; font-size: 0.9rem; }
-        .guest-role { font-size: 0.75rem; opacity: 0.7; margin-top: 2px; }
+        aside { 
+            width: 250px; background: var(--panel); border-right: 1px solid var(--border); 
+            padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto;
+        }
+        .aside-title { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 10px; }
         
-        /* ÁREA PRINCIPAL */
-        .main-area { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .guest-card { 
+            background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; cursor: pointer; 
+            transition: 0.2s; border-left: 4px solid transparent; display: flex; align-items: center; gap: 10px;
+        }
+        .guest-card:hover { background: rgba(255,255,255,0.1); }
+        .guest-card.active { background: rgba(56, 189, 248, 0.1); border-left-color: var(--accent); }
         
-        /* CHAT / COLABORAÇÃO */
-        .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .message { max-width: 80%; padding: 12px 16px; border-radius: 12px; font-size: 0.95rem; line-height: 1.5; animation: fadeIn 0.3s ease; }
-        .message.user { align-self: flex-end; background: var(--accent); color: #fff; border-bottom-right-radius: 2px; }
-        .message.ai { align-self: flex-start; background: var(--card); border: 1px solid var(--border); border-bottom-left-radius: 2px; }
-        .msg-meta { font-size: 0.7rem; opacity: 0.6; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+        .avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; color: white; }
+        .av-user { background: var(--user-color); }
+        .av-qwen { background: var(--ai-qwen); }
+        .av-claude { background: var(--ai-claude); }
+        .av-gemini { background: var(--ai-gemini); }
+        .av-other { background: #64748b; }
+
+        .guest-info h4 { font-size: 0.9rem; color: var(--text); }
+        .guest-info p { font-size: 0.75rem; color: #94a3b8; }
+
+        /* ÁREA DO CHAT */
+        .chat-area { flex: 1; display: flex; flex-direction: column; position: relative; }
         
-        /* INPUT AREA */
-        .input-area { padding: 20px; background: var(--card); border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: center; }
-        .input-wrapper { flex: 1; position: relative; }
-        textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 8px; resize: none; outline: none; min-height: 50px; max-height: 150px; font-family: inherit; }
-        textarea:focus { border-color: var(--accent); }
-        .send-btn { background: var(--vip-gold); color: #000; border: none; padding: 0 20px; height: 50px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .send-btn:hover { filter: brightness(1.1); }
+        .messages-container { 
+            flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; 
+            scroll-behavior: smooth;
+        }
         
-        /* CONTEXT BAR (Dados do Hub) */
-        .context-bar { padding: 10px 20px; background: rgba(210, 153, 34, 0.05); border-bottom: 1px solid var(--border); font-size: 0.8rem; color: var(--vip-gold); display: flex; justify-content: space-between; align-items: center; }
+        /* BALÕES DE MENSAGEM */
+        .msg-wrapper { display: flex; gap: 10px; max-width: 85%; animation: fadeIn 0.3s ease; }
+        .msg-wrapper.right { align-self: flex-end; flex-direction: row-reverse; }
         
+        .msg-bubble { 
+            padding: 12px 16px; border-radius: 12px; font-size: 0.95rem; line-height: 1.5; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); word-wrap: break-word;
+        }
+        .msg-meta { font-size: 0.7rem; opacity: 0.7; margin-top: 5px; display: block; }
+        
+        /* Estilos por Remetente */
+        .bubble-user { background: var(--user-color); color: #064e3b; border-bottom-right-radius: 2px; }
+        .bubble-qwen { background: var(--ai-qwen); color: #fff; border-bottom-left-radius: 2px; }
+        .bubble-claude { background: var(--ai-claude); color: #fff; border-bottom-left-radius: 2px; }
+        .bubble-gemini { background: var(--ai-gemini); color: #fff; border-bottom-left-radius: 2px; }
+        .bubble-system { background: var(--border); color: #cbd5e1; font-style: italic; text-align: center; align-self: center; max-width: 100%; border-radius: 20px; padding: 5px 15px; font-size: 0.8rem;}
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* INPUT AREA */
+        .input-zone { 
+            background: var(--panel); padding: 15px 20px; border-top: 1px solid var(--border); 
+            display: flex; gap: 10px; align-items: flex-end;
+        }
+        textarea { 
+            flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text); 
+            padding: 12px; border-radius: 8px; resize: none; outline: none; font-family: inherit; min-height: 50px; max-height: 150px;
+        }
+        textarea:focus { border-color: var(--accent); }
+        
+        .controls { display: flex; flex-direction: column; gap: 5px; }
+        button.send-btn { 
+            background: var(--accent); color: #0f172a; border: none; padding: 12px 20px; 
+            border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        button.send-btn:hover { filter: brightness(1.1); }
+        
+        select.sender-select { 
+            background: var(--bg); color: var(--text); border: 1px solid var(--border); 
+            padding: 8px; border-radius: 6px; font-size: 0.85rem; width: 100%;
+        }
+
+        /* FERRAMENTAS EXTRAS */
+        .tools-bar { padding: 10px 20px; background: rgba(0,0,0,0.2); display: flex; gap: 10px; justify-content: flex-end; }
+        .tool-btn { background: transparent; border: 1px solid var(--border); color: #94a3b8; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
+        .tool-btn:hover { color: var(--text); border-color: var(--text); }
+
     </style>
 </head>
 <body>
 
-<!-- SIDEBAR: CONVIDADOS DA SALA VIP -->
-<div class="sidebar">
-    <div class="vip-header">
-        <span style="font-size:1.5rem">🛋️</span>
-        <div class="vip-title">SALA VIP</div>
-    </div>
-    <div class="guest-list">
-        <div class="guest-item active" onclick="selectGuest(this, 'qwen-main')">
-            <div class="guest-name">🧠 Qwen Principal</div>
-            <div class="guest-role">Orquestrador & Contexto Geral</div>
-        </div>
-        <div class="guest-item" onclick="selectGuest(this, 'qwen-vl')">
-            <div class="guest-name">👁️ Qwen Vision</div>
-            <div class="guest-role">Análise de Imagens & UI</div>
-        </div>
-        <div class="guest-item" onclick="selectGuest(this, 'qwen-coder')">
-            <div class="guest-name"> Qwen Coder</div>
-            <div class="guest-role">Geração & Debug de Código</div>
-        </div>
-        <div class="guest-item" onclick="selectGuest(this, 'human-guest')">
-            <div class="guest-name">👤 Convidado Humano</div>
-            <div class="guest-role">Colaboração Externa</div>
-        </div>
-    </div>
-    
-    <div style="padding:15px; border-top:1px solid var(--border);">
-        <button onclick="clearChat()" style="width:100%; background:transparent; border:1px solid var(--border); color:var(--text); padding:8px; border-radius:6px; cursor:pointer; font-size:0.8rem;">🗑️ Limpar Sessão</button>
-    </div>
-</div>
+<header>
+    <div class="brand">🛋️ Sala VIP <span style="font-size:0.8rem; opacity:0.7;">| Convite Aberto</span></div>
+    <div class="status">Local Storage Ativo • Sem Custo</div>
+</header>
 
-<!-- ÁREA DE COLABORAÇÃO -->
-<div class="main-area">
-    <div class="context-bar">
-        <span id="activeGuest">Conversando com: Qwen Principal</span>
-        <span id="hubStatus"> Hub D1: Conectado</span>
-    </div>
-    
-    <div class="chat-container" id="chatContainer">
-        <div class="message ai">
-            <div class="msg-meta">🧠 Qwen Principal • Agora</div>
-            Bem-vindo à Sala VIP! Estou conectado ao seu OmniHub (D1). Posso ver seus projetos, analisar imagens ou ajudar com código. Quem mais você gostaria de trazer para esta sessão?
+<main>
+    <!-- SIDEBAR: QUEM ESTÁ NA SALA -->
+    <aside id="guestList">
+        <div class="aside-title">Convidados Presentes</div>
+        <!-- Gerado via JS -->
+    </aside>
+
+    <!-- CHAT PRINCIPAL -->
+    <section class="chat-area">
+        <div class="tools-bar">
+            <button class="tool-btn" onclick="exportChat()">📥 Exportar JSON</button>
+            <button class="tool-btn" onclick="clearChat()">🗑️ Limpar Tela</button>
         </div>
-    </div>
-    
-    <div class="input-area">
-        <div class="input-wrapper">
-            <textarea id="msgInput" placeholder="Digite sua mensagem... (Shift+Enter para nova linha)" onkeydown="handleKey(event)"></textarea>
+        
+        <div class="messages-container" id="chatLog">
+            <div class="msg-wrapper">
+                <div class="msg-bubble bubble-system">
+                    Bem-vindo à Sala VIP. Selecione quem vai falar abaixo. Cole respostas de IAs externas aqui para registrar o histórico.
+                </div>
+            </div>
         </div>
-        <button class="send-btn" onclick="sendMessage()">Enviar</button>
-    </div>
-</div>
+
+        <div class="input-zone">
+            <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
+                <select id="senderSelect" class="sender-select">
+                    <option value="user">👤 Eu (HDMicro)</option>
+                    <option value="qwen">🧠 Qwen (Colar Resposta)</option>
+                    <option value="claude">🟠 Claude (Colar Resposta)</option>
+                    <option value="gemini">🔵 Gemini (Colar Resposta)</option>
+                    <option value="other">🤖 Outra IA / Convidado</option>
+                </select>
+                <textarea id="msgInput" placeholder="Digite sua mensagem ou cole a resposta da IA selecionada..." onkeydown="handleKey(event)"></textarea>
+            </div>
+            <div class="controls">
+                <button class="send-btn" onclick="sendMessage()">Enviar ➤</button>
+            </div>
+        </div>
+    </section>
+</main>
 
 <script>
-// ============ CONFIGURAÇÃO ============
-const API_URL = 'https://hub-ias.hdmicro-ml.workers.dev/api/projects';
-let currentToken = localStorage.getItem('omnihub_token') || '';
-let activeGuestId = 'qwen-main';
-let chatHistory = [];
+// ============ ESTADO E CONFIGURAÇÃO ============
+const STORAGE_KEY = 'omnihub_sala_vip_history';
+let messages = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+let currentSender = 'user';
 
-// ============ NAVEGAÇÃO DE CONVIDADOS ============
-function selectGuest(el, guestId) {
-    document.querySelectorAll('.guest-item').forEach(i => i.classList.remove('active'));
-    el.classList.add('active');
-    activeGuestId = guestId;
-    
-    const names = {
-        'qwen-main': 'Qwen Principal',
-        'qwen-vl': 'Qwen Vision', 
-        'qwen-coder': 'Qwen Coder',
-        'human-guest': 'Convidado Humano'
-    };
-    document.getElementById('activeGuest').textContent = `Conversando com: ${names[guestId]}`;
-    
-    // Adiciona mensagem de sistema ao trocar
-    addMessage('system', `Você mudou para ${names[guestId]}. O contexto do Hub permanece ativo.`);
-}
+// Definição dos Avatares e Cores
+const AVATARS = {
+    user: { name: 'Eu', class: 'av-user', icon: 'HD' },
+    qwen: { name: 'Qwen', class: 'av-qwen', icon: 'Qw' },
+    claude: { name: 'Claude', class: 'av-claude', icon: 'Cl' },
+    gemini: { name: 'Gemini', class: 'av-gemini', icon: 'Ge' },
+    other: { name: 'Outro', class: 'av-other', icon: '?' }
+};
 
-// ============ MENSAGENS ============
-function addMessage(type, text, meta = '') {
-    const container = document.getElementById('chatContainer');
-    const div = document.createElement('div');
+// ============ INICIALIZAÇÃO ============
+document.addEventListener('DOMContentLoaded', () => {
+    renderGuestSidebar();
+    renderMessages();
     
-    if (type === 'system') {
-        div.className = 'message';
-        div.style.alignSelf = 'center';
-        div.style.background = 'transparent';
-        div.style.color = 'var(--subtext)';
-        div.style.fontSize = '0.8rem';
-        div.style.fontStyle = 'italic';
-        div.textContent = text;
-    } else {
-        div.className = `message ${type}`;
-        const icons = { user: '👤', 'qwen-main': '🧠', 'qwen-vl': '👁️', 'qwen-coder': '💻', 'human-guest': '👥' };
-        div.innerHTML = `
-            <div class="msg-meta">${icons[type] || '🤖'} ${getGuestName(type)} • ${new Date().toLocaleTimeString()}</div>
-            ${text.replace(/\n/g, '<br>')}
+    // Sincroniza seleção inicial
+    document.getElementById('senderSelect').addEventListener('change', (e) => {
+        currentSender = e.target.value;
+    });
+});
+
+// ============ RENDERIZAÇÃO DA SIDEBAR ============
+function renderGuestSidebar() {
+    const list = document.getElementById('guestList');
+    list.innerHTML = '<div class="aside-title">Convidados Presentes</div>';
+    
+    Object.keys(AVATARS).forEach(key => {
+        const data = AVATARS[key];
+        const isActive = key === currentSender ? 'active' : '';
+        list.innerHTML += `
+            <div class="guest-card ${isActive}" onclick="setActiveSender('${key}')">
+                <div class="avatar ${data.class}">${data.icon}</div>
+                <div class="guest-info">
+                    <h4>${data.name}</h4>
+                    <p>${key === 'user' ? 'Administrador' : 'IA Convidada'}</p>
+                </div>
+            </div>
         `;
-    }
-    
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-    chatHistory.push({ type, text, timestamp: new Date().toISOString() });
+    });
 }
 
-function getGuestName(type) {
-    if (type === 'user') return 'Você';
-    const names = { 'qwen-main': 'Qwen Principal', 'qwen-vl': 'Qwen Vision', 'qwen-coder': 'Qwen Coder', 'human-guest': 'Convidado' };
-    return names[type] || 'IA';
+function setActiveSender(key) {
+    currentSender = key;
+    document.getElementById('senderSelect').value = key;
+    renderGuestSidebar(); // Atualiza destaque visual
+    document.getElementById('msgInput').focus();
 }
 
-// ============ ENVIO E INTEGRAÇÃO HUB ============
-async function sendMessage() {
+// ============ GESTÃO DE MENSAGENS ============
+function sendMessage() {
     const input = document.getElementById('msgInput');
     const text = input.value.trim();
     if (!text) return;
-    
-    addMessage('user', text);
+
+    const newMsg = {
+        id: Date.now(),
+        sender: currentSender,
+        text: text,
+        timestamp: new Date().toISOString()
+    };
+
+    messages.push(newMsg);
+    saveToStorage();
+    renderSingleMessage(newMsg);
     input.value = '';
+    scrollToBottom();
+}
+
+function renderMessages() {
+    const container = document.getElementById('chatLog');
+    container.innerHTML = ''; // Limpa antes de re-renderizar tudo (para carregamento inicial)
     
-    // Simulação de resposta contextual baseada no convidado ativo
-    // Em produção, isso chamaria a API real do Worker com routing por agente
-    setTimeout(() => {
-        let response = '';
-        if (activeGuestId === 'qwen-coder') {
-            response = `💻 [Qwen Coder]: Analisando seu pedido sobre "${text.substring(0, 30)}..." \n\nPosso gerar código Python/JS para isso. Quer que eu crie um snippet e registre no Hub como "Criando"?`;
-        } else if (activeGuestId === 'qwen-vl') {
-            response = `️ [Qwen Vision]: Pronto para análise visual. Arraste uma imagem aqui ou descreva o que precisa identificar nos seus projetos.`;
-        } else {
-            response = ` [Qwen Principal]: Entendido. Tenho acesso aos seus ${document.getElementById('hubStatus').textContent.includes('Conectado') ? 'projetos no D1' : 'dados locais'}. Como posso ajudar a organizar ou criar algo novo hoje?`;
-        }
-        addMessage(activeGuestId, response);
-    }, 800);
+    if (messages.length === 0) {
+         container.innerHTML = `<div class="msg-wrapper"><div class="msg-bubble bubble-system">Nenhuma mensagem ainda. Comece a conversar!</div></div>`;
+         return;
+    }
+
+    messages.forEach(msg => renderSingleMessage(msg));
+    scrollToBottom();
+}
+
+function renderSingleMessage(msg) {
+    const container = document.getElementById('chatLog');
+    const avatarData = AVATARS[msg.sender] || AVATARS.other;
+    const isUser = msg.sender === 'user';
+    const alignmentClass = isUser ? 'right' : 'left';
+    const bubbleClass = `bubble-${msg.sender}`;
     
-    // Se mencionar "hub" ou "projeto", busca dados reais
-    if (text.toLowerCase().includes('hub') || text.toLowerCase().includes('projeto')) {
-        fetchHubData();
+    const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    const wrapper = document.createElement('div');
+    wrapper.className = `msg-wrapper ${alignmentClass}`;
+    wrapper.innerHTML = `
+        <div class="avatar ${avatarData.class}" style="width:24px;height:24px;font-size:0.6rem;margin-top:5px;">${avatarData.icon}</div>
+        <div class="msg-bubble ${bubbleClass}">
+            ${escapeHtml(msg.text)}
+            <span class="msg-meta">${avatarData.name} • ${timeStr}</span>
+        </div>
+    `;
+    container.appendChild(wrapper);
+}
+
+// ============ UTILITÁRIOS ============
+function saveToStorage() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+}
+
+function clearChat() {
+    if(confirm("Tem certeza que deseja apagar todo o histórico desta sala?")) {
+        messages = [];
+        saveToStorage();
+        renderMessages();
     }
 }
 
-async function fetchHubData() {
-    if (!currentToken) {
-        addMessage('system', '⚠️ Token não configurado. Cole seu ADMIN_TOKEN para acessar dados do Hub.');
-        const t = prompt('ADMIN_TOKEN:');
-        if (t) { localStorage.setItem('omnihub_token', t); currentToken = t; }
-        else return;
-    }
-    
-    try {
-        const res = await fetch(API_URL, { headers: { 'Authorization': `Bearer ${currentToken}` } });
-        const data = await res.json();
-        if (data.success) {
-            addMessage('system', `📊 Dados do Hub carregados: ${data.count} projetos encontrados no D1.`);
-        }
-    } catch(e) {
-        addMessage('system', '❌ Falha ao buscar dados do Hub.');
-    }
+function exportChat() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(messages, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", `sala_vip_backup_${new Date().toISOString().slice(0,10)}.json`);
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+}
+
+function escapeHtml(text) {
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+function scrollToBottom() {
+    const container = document.getElementById('chatLog');
+    container.scrollTop = container.scrollHeight;
 }
 
 function handleKey(e) {
@@ -214,17 +304,6 @@ function handleKey(e) {
         sendMessage();
     }
 }
-
-function clearChat() {
-    if (confirm('Limpar toda a sessão da Sala VIP?')) {
-        document.getElementById('chatContainer').innerHTML = '';
-        chatHistory = [];
-        addMessage('ai', 'Sessão limpa. Bem-vindo de volta à Sala VIP!');
-    }
-}
-
-// Inicialização
-if (currentToken) fetchHubData();
 </script>
 </body>
 </html>
