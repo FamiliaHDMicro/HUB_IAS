@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniHub Admin | HDMicro</title>
+    <style>
+        :root { --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --accent: #58a6ff; --border: #30363d; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        /* Header & Config */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+        h1 { margin: 0; font-size: 1.5rem; }
+        .config-box { background: var(--card); padding: 15px; border-radius: 8px; border: 1px solid var(--border); display: flex; gap: 10px; align-items: center; }
+        input[type="password"], input[type="text"] { background: #0d1117; border: 1px solid var(--border); color: white; padding: 8px; border-radius: 4px; flex-grow: 1; }
+        button { background: var(--accent); color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: opacity 0.2s; }
+        button:hover { opacity: 0.8; }
+        button.secondary { background: #238636; }
+        
+        /* Stats Cards */
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--card); padding: 20px; border-radius: 8px; border-left: 4px solid var(--accent); }
+        .stat-card h3 { margin: 0 0 10px 0; font-size: 0.9rem; opacity: 0.7; }
+        .stat-card .value { font-size: 2rem; font-weight: bold; }
+        
+        /* Project List */
+        .project-list { display: grid; gap: 15px; }
+        .project-item { background: var(--card); padding: 20px; border-radius: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s; }
+        .project-item:hover { transform: translateY(-2px); border-color: var(--accent); }
+        .proj-info h4 { margin: 0 0 5px 0; color: var(--accent); }
+        .proj-meta { font-size: 0.85rem; opacity: 0.6; }
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
+        
+        /* Modal / Form */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 100; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--card); padding: 30px; border-radius: 12px; width: 100%; max-width: 500px; border: 1px solid var(--border); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 0.9rem; }
+        select, textarea { width: 100%; background: #0d1117; border: 1px solid var(--border); color: white; padding: 10px; border-radius: 4px; box-sizing: border-box; }
+        .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+        
+        /* Loading */
+        .loading { text-align: center; padding: 40px; opacity: 0.5; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🧠 OmniHub Admin</h1>
+        <div class="config-box">
+            <input type="password" id="tokenInput" placeholder="Cole seu ADMIN_TOKEN aqui..." />
+            <button onclick="saveToken()">Salvar Token</button>
+        </div>
+    </header>
+
+    <!-- Dashboard Stats -->
+    <div class="stats" id="statsContainer">
+        <div class="stat-card"><h3>Total de Projetos</h3><div class="value" id="countTotal">-</div></div>
+        <div class="stat-card" style="border-color: #FFD700;"><h3>Criando</h3><div class="value" id="countCriando">-</div></div>
+        <div class="stat-card" style="border-color: #2196F3;"><h3>Em Uso</h3><div class="value" id="countEmUso">-</div></div>
+        <div class="stat-card" style="border-color: #4CAF50;"><h3>Criados</h3><div class="value" id="countCriados">-</div></div>
+    </div>
+
+    <!-- Actions Bar -->
+    <div style="margin-bottom: 20px; display: flex; justify-content: space-between;">
+        <h2>Gerenciamento de Projetos</h2>
+        <button class="secondary" onclick="openModal()">+ Novo Projeto</button>
+    </div>
+
+    <!-- List -->
+    <div id="loading" class="loading">Carregando dados da nuvem...</div>
+    <div class="project-list" id="projectList"></div>
+</div>
+
+<!-- Modal de Criação/Edição -->
+<div class="modal" id="projectModal">
+    <div class="modal-content">
+        <h3 id="modalTitle">Novo Projeto</h3>
+        <div class="form-group">
+            <label>Nome do Projeto</label>
+            <input type="text" id="projName" placeholder="Ex: Conversor de Ícones Zumbi">
+        </div>
+        <div class="form-group">
+            <label>Status Atual</label>
+            <select id="projStatus">
+                <option value="Criando">Criando</option>
+                <option value="Em Uso">Em Uso</option>
+                <option value="Criados">Criados</option>
+                <option value="Criados mas sem uso">Criados mas sem uso</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Branch GitHub (Opcional)</label>
+            <input type="text" id="projBranch" placeholder="main / dev / feature-x">
+        </div>
+        <div class="form-group">
+            <label>Descrição Técnica</label>
+            <textarea id="projDesc" rows="3" placeholder="Breve resumo do que o projeto faz..."></textarea>
+        </div>
+        <div class="actions">
+            <button style="background:#30363d" onclick="closeModal()">Cancelar</button>
+            <button onclick="submitProject()">Salvar Projeto</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'https://hub-ias.hdmicro-ml.workers.dev/api/projects';
+    let currentToken = localStorage.getItem('omnihub_token') || '';
+    document.getElementById('tokenInput').value = currentToken;
+
+    // --- AUTENTICAÇÃO ---
+    function saveToken() {
+        const token = document.getElementById('tokenInput').value.trim();
+        if(token) {
+            localStorage.setItem('omnihub_token', token);
+            currentToken = token;
+            alert('Token salvo! Recarregando dados...');
+            loadProjects();
+        } else {
+            alert('Por favor, insira um token válido.');
+        }
+    }
+
+    // --- CARREGAMENTO ---
+    async function loadProjects() {
+        if(!currentToken) {
+            document.getElementById('projectList').innerHTML = '<p style="text-align:center">Insira seu ADMIN_TOKEN acima para visualizar os projetos.</p>';
+            return;
+        }
+
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('projectList').innerHTML = '';
+        
+        try {
+            const res = await fetch(API_URL, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+            const data = await res.json();
+            
+            if(data.success) {
+                renderStats(data.data);
+                renderList(data.data);
+            } else {
+                throw new Error(data.error || 'Erro desconhecido');
+            }
+        } catch(err) {
+            document.getElementById('projectList').innerHTML = `<p style="color:#f85149; text-align:center">Erro: ${err.message}. Verifique seu token.</p>`;
+        } finally {
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+
+    function renderStats(projects) {
+        const counts = { 'Criando': 0, 'Em Uso': 0, 'Criados': 0, 'Criados mas sem uso': 0 };
+        projects.forEach(p => { if(counts[p.status_label] !== undefined) counts[p.status_label]++; });
+        
+        document.getElementById('countTotal').innerText = projects.length;
+        document.getElementById('countCriando').innerText = counts['Criando'];
+        document.getElementById('countEmUso').innerText = counts['Em Uso'];
+        document.getElementById('countCriados').innerText = counts['Criados'];
+    }
+
+    function renderList(projects) {
+        const list = document.getElementById('projectList');
+        if(projects.length === 0) {
+            list.innerHTML = '<p style="text-align:center; opacity:0.6">Nenhum projeto encontrado na nuvem.</p>';
+            return;
+        }
+
+        list.innerHTML = projects.map(p => `
+            <div class="project-item">
+                <div class="proj-info">
+                    <h4>${p.name}</h4>
+                    <div class="proj-meta">${p.description || 'Sem descrição'} • Branch: ${p.github_branch || 'N/A'}</div>
+                    <div class="proj-meta" style="margin-top:5px">Atualizado em: ${new Date(p.updated_at).toLocaleDateString('pt-BR')}</div>
+                </div>
+                <span class="status-badge" style="background:${p.color_hex}20; color:${p.color_hex}; border:1px solid ${p.color_hex}40">
+                    ${p.status_label}
+                </span>
+            </div>
+        `).join('');
+    }
+
+    // --- MODAL & CRIAÇÃO ---
+    function openModal() { document.getElementById('projectModal').classList.add('active'); }
+    function closeModal() { 
+        document.getElementById('projectModal').classList.remove('active');
+        ['projName','projBranch','projDesc'].forEach(id => document.getElementById(id).value = '');
+    }
+
+    async function submitProject() {
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.innerText = 'Enviando...';
+        btn.disabled = true;
+
+        const payload = {
+            name: document.getElementById('projName').value,
+            status_label: document.getElementById('projStatus').value,
+            github_branch: document.getElementById('projBranch').value,
+            description: document.getElementById('projDesc').value
+        };
+
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${currentToken}`
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if(data.success) {
+                closeModal();
+                loadProjects();
+            } else {
+                alert('Erro: ' + data.error);
+            }
+        } catch(err) {
+            alert('Falha na conexão: ' + err.message);
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    // Carrega ao iniciar se tiver token
+    if(currentToken) loadProjects();
+</script>
+
+</body>
+</html>
