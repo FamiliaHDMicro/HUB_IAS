@@ -1,0 +1,18 @@
+async function sendToOmniHub() {
+    const token = localStorage.getItem('omnihub_token');
+    if (!token) { const t = prompt('Cole seu ADMIN_TOKEN:'); if(!t) return; localStorage.setItem('omnihub_token', t); }
+    
+    const lang = document.getElementById('saver-lang').value;
+    const name = (document.getElementById('saver-name').value || 'untitled') + SAVER_TEMPLATES[lang].ext;
+    
+    try {
+        const resp = await fetch('https://hub-ias.hdmicro-ml.workers.dev/api/projects', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('omnihub_token')}` },
+            body: JSON.stringify({ 
+                name, 
+                description: `Criado via Workbench (${lang})`, 
+                status_label: 'Criando' 
+            })
+        });
+        // ... resto do código ...

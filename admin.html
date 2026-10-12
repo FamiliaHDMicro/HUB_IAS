@@ -3,233 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OmniHub Admin | HDMicro</title>
+    <title>OmniHub Admin | Curadoria HDMicro</title>
     <style>
-        :root { --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --accent: #58a6ff; --border: #30363d; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
+        :root { --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --accent: #58a6ff; --border: #30363d; --green: #238636; }
+        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
         
-        /* Header & Config */
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
-        h1 { margin: 0; font-size: 1.5rem; }
-        .config-box { background: var(--card); padding: 15px; border-radius: 8px; border: 1px solid var(--border); display: flex; gap: 10px; align-items: center; }
-        input[type="password"], input[type="text"] { background: #0d1117; border: 1px solid var(--border); color: white; padding: 8px; border-radius: 4px; flex-grow: 1; }
-        button { background: var(--accent); color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: opacity 0.2s; }
-        button:hover { opacity: 0.8; }
-        button.secondary { background: #238636; }
+        /* HEADER & TOKEN */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        h1 { margin: 0; font-size: 1.4rem; }
+        .token-box { display: flex; gap: 10px; }
+        input[type="password"] { background: #0d1117; border: 1px solid var(--border); color: white; padding: 8px; border-radius: 4px; width: 200px; }
+        button { background: var(--accent); color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         
-        /* Stats Cards */
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .stat-card { background: var(--card); padding: 20px; border-radius: 8px; border-left: 4px solid var(--accent); }
-        .stat-card h3 { margin: 0 0 10px 0; font-size: 0.9rem; opacity: 0.7; }
-        .stat-card .value { font-size: 2rem; font-weight: bold; }
+        /* BUSCA LOCAL (Performance para Pentium) */
+        .search-bar { margin-bottom: 20px; }
+        .search-bar input { width: 100%; padding: 10px; background: var(--card); border: 1px solid var(--border); color: white; border-radius: 6px; font-size: 1rem; }
         
-        /* Project List */
-        .project-list { display: grid; gap: 15px; }
-        .project-item { background: var(--card); padding: 20px; border-radius: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s; }
-        .project-item:hover { transform: translateY(-2px); border-color: var(--accent); }
-        .proj-info h4 { margin: 0 0 5px 0; color: var(--accent); }
-        .proj-meta { font-size: 0.85rem; opacity: 0.6; }
-        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
+        /* ZONA DE UPLOAD */
+        .upload-zone { 
+            border: 2px dashed var(--border); border-radius: 12px; padding: 30px; text-align: center; 
+            background: var(--card); transition: all 0.3s; margin-bottom: 20px; cursor: pointer;
+        }
+        .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: rgba(88, 166, 255, 0.05); }
+        .upload-zone h2 { margin: 0 0 10px 0; color: var(--accent); font-size: 1.1rem; }
+        .upload-zone p { margin: 0; opacity: 0.7; font-size: 0.85rem; }
+        #fileInput { display: none; }
         
-        /* Modal / Form */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 100; }
-        .modal.active { display: flex; }
-        .modal-content { background: var(--card); padding: 30px; border-radius: 12px; width: 100%; max-width: 500px; border: 1px solid var(--border); }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-size: 0.9rem; }
-        select, textarea { width: 100%; background: #0d1117; border: 1px solid var(--border); color: white; padding: 10px; border-radius: 4px; box-sizing: border-box; }
-        .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+        /* STATS */
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .stat-card { background: var(--card); padding: 10px; border-radius: 6px; text-align: center; border-left: 3px solid var(--accent); }
+        .stat-card .val { font-size: 1.5rem; font-weight: bold; display: block; }
+        .stat-card .lbl { font-size: 0.75rem; opacity: 0.7; text-transform: uppercase; }
         
-        /* Loading */
-        .loading { text-align: center; padding: 40px; opacity: 0.5; display: none; }
+        /* LISTA DE PROJETOS */
+        .project-list { display: grid; gap: 8px; }
+        .proj-item { background: var(--card); padding: 12px 15px; border-radius: 6px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .proj-info { flex: 1; overflow: hidden; }
+        .proj-name { font-weight: bold; color: var(--accent); white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+        .proj-meta { font-size: 0.75rem; opacity: 0.6; margin-top: 2px; display: flex; gap: 10px; }
+        .badge { padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
+        
+        /* TOAST */
+        .toast { position: fixed; bottom: 20px; right: 20px; background: var(--card); border: 1px solid var(--border); padding: 12px 20px; border-radius: 8px; transform: translateY(100px); opacity: 0; transition: 0.3s; z-index: 100; }
+        .toast.show { transform: translateY(0); opacity: 1; }
     </style>
 </head>
 <body>
-
 <div class="container">
     <header>
         <h1>🧠 OmniHub Admin</h1>
-        <div class="config-box">
-            <input type="password" id="tokenInput" placeholder="Cole seu ADMIN_TOKEN aqui..." />
-            <button onclick="saveToken()">Salvar Token</button>
+        <div class="token-box">
+            <input type="password" id="tokenInput" placeholder="ADMIN_TOKEN..." />
+            <button onclick="saveToken()">Salvar</button>
         </div>
     </header>
 
-    <!-- Dashboard Stats -->
+    <!-- CAMPO MÁGICO DE UPLOAD -->
+    <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <h2>☁️ Arraste suas "Loucuras" aqui</h2>
+        <p>.py, .bat, .html, .js, .sql... Tudo vai direto pro D1 como "Criados"</p>
+        <input type="file" id="fileInput" multiple onchange="handleFiles(this.files)">
+    </div>
+
+    <!-- BUSCA INSTANTÂNEA -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 Buscar projeto pelo nome ou tipo..." oninput="filterProjects()">
+    </div>
+
+    <!-- DASHBOARD -->
     <div class="stats" id="statsContainer">
-        <div class="stat-card"><h3>Total de Projetos</h3><div class="value" id="countTotal">-</div></div>
-        <div class="stat-card" style="border-color: #FFD700;"><h3>Criando</h3><div class="value" id="countCriando">-</div></div>
-        <div class="stat-card" style="border-color: #2196F3;"><h3>Em Uso</h3><div class="value" id="countEmUso">-</div></div>
-        <div class="stat-card" style="border-color: #4CAF50;"><h3>Criados</h3><div class="value" id="countCriados">-</div></div>
+        <div class="stat-card"><span class="val" id="countTotal">-</span><span class="lbl">Total</span></div>
+        <div class="stat-card" style="border-color:#FFD700"><span class="val" id="countCriando">-</span><span class="lbl">Criando</span></div>
+        <div class="stat-card" style="border-color:#2196F3"><span class="val" id="countEmUso">-</span><span class="lbl">Em Uso</span></div>
+        <div class="stat-card" style="border-color:#4CAF50"><span class="val" id="countCriados">-</span><span class="lbl">Criados</span></div>
     </div>
 
-    <!-- Actions Bar -->
-    <div style="margin-bottom: 20px; display: flex; justify-content: space-between;">
-        <h2>Gerenciamento de Projetos</h2>
-        <button class="secondary" onclick="openModal()">+ Novo Projeto</button>
-    </div>
-
-    <!-- List -->
-    <div id="loading" class="loading">Carregando dados da nuvem...</div>
+    <div id="loading" style="text-align:center;padding:20px;opacity:0.5;display:none">Carregando acervo...</div>
     <div class="project-list" id="projectList"></div>
 </div>
 
-<!-- Modal de Criação/Edição -->
-<div class="modal" id="projectModal">
-    <div class="modal-content">
-        <h3 id="modalTitle">Novo Projeto</h3>
-        <div class="form-group">
-            <label>Nome do Projeto</label>
-            <input type="text" id="projName" placeholder="Ex: Conversor de Ícones Zumbi">
-        </div>
-        <div class="form-group">
-            <label>Status Atual</label>
-            <select id="projStatus">
-                <option value="Criando">Criando</option>
-                <option value="Em Uso">Em Uso</option>
-                <option value="Criados">Criados</option>
-                <option value="Criados mas sem uso">Criados mas sem uso</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Branch GitHub (Opcional)</label>
-            <input type="text" id="projBranch" placeholder="main / dev / feature-x">
-        </div>
-        <div class="form-group">
-            <label>Descrição Técnica</label>
-            <textarea id="projDesc" rows="3" placeholder="Breve resumo do que o projeto faz..."></textarea>
-        </div>
-        <div class="actions">
-            <button style="background:#30363d" onclick="closeModal()">Cancelar</button>
-            <button onclick="submitProject()">Salvar Projeto</button>
-        </div>
-    </div>
-</div>
+<div class="toast" id="toast"></div>
 
 <script>
-    const API_URL = 'https://hub-ias.hdmicro-ml.workers.dev/api/projects';
-    let currentToken = localStorage.getItem('omnihub_token') || '';
-    document.getElementById('tokenInput').value = currentToken;
+const API = 'https://hub-ias.hdmicro-ml.workers.dev/api/projects';
+let token = localStorage.getItem('omnihub_token') || '';
+let allProjects = []; // Guarda tudo na memória para busca rápida
 
-    // --- AUTENTICAÇÃO ---
-    function saveToken() {
-        const token = document.getElementById('tokenInput').value.trim();
-        if(token) {
-            localStorage.setItem('omnihub_token', token);
-            currentToken = token;
-            alert('Token salvo! Recarregando dados...');
-            loadProjects();
-        } else {
-            alert('Por favor, insira um token válido.');
-        }
-    }
+document.getElementById('tokenInput').value = token;
 
-    // --- CARREGAMENTO ---
-    async function loadProjects() {
-        if(!currentToken) {
-            document.getElementById('projectList').innerHTML = '<p style="text-align:center">Insira seu ADMIN_TOKEN acima para visualizar os projetos.</p>';
-            return;
-        }
+// --- AUTENTICAÇÃO ---
+function saveToken() {
+    const t = document.getElementById('tokenInput').value.trim();
+    if(t) { localStorage.setItem('omnihub_token', t); token = t; showToast('✅ Token salvo!'); loadProjects(); }
+}
 
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('projectList').innerHTML = '';
+// --- UPLOAD INTELIGENTE ---
+const dropZone = document.getElementById('dropZone');
+['dragenter','dragover'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.add('dragover'); }));
+['dragleave','drop'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.remove('dragover'); }));
+dropZone.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+
+async function handleFiles(files) {
+    if(!token) { alert('Salve o token primeiro!'); return; }
+    let uploaded = 0;
+    
+    for(const file of files) {
+        // Detecta extensão automaticamente
+        const ext = '.' + file.name.split('.').pop().toLowerCase();
+        const validExts = ['.py','.js','.html','.css','.bat','.ps1','.sql','.json','.md','.txt','.cs','.java'];
+        if(!validExts.includes(ext)) continue;
         
         try {
-            const res = await fetch(API_URL, { headers: { 'Authorization': `Bearer ${currentToken}` } });
-            const data = await res.json();
-            
-            if(data.success) {
-                renderStats(data.data);
-                renderList(data.data);
-            } else {
-                throw new Error(data.error || 'Erro desconhecido');
-            }
-        } catch(err) {
-            document.getElementById('projectList').innerHTML = `<p style="color:#f85149; text-align:center">Erro: ${err.message}. Verifique seu token.</p>`;
-        } finally {
-            document.getElementById('loading').style.display = 'none';
-        }
-    }
-
-    function renderStats(projects) {
-        const counts = { 'Criando': 0, 'Em Uso': 0, 'Criados': 0, 'Criados mas sem uso': 0 };
-        projects.forEach(p => { if(counts[p.status_label] !== undefined) counts[p.status_label]++; });
-        
-        document.getElementById('countTotal').innerText = projects.length;
-        document.getElementById('countCriando').innerText = counts['Criando'];
-        document.getElementById('countEmUso').innerText = counts['Em Uso'];
-        document.getElementById('countCriados').innerText = counts['Criados'];
-    }
-
-    function renderList(projects) {
-        const list = document.getElementById('projectList');
-        if(projects.length === 0) {
-            list.innerHTML = '<p style="text-align:center; opacity:0.6">Nenhum projeto encontrado na nuvem.</p>';
-            return;
-        }
-
-        list.innerHTML = projects.map(p => `
-            <div class="project-item">
-                <div class="proj-info">
-                    <h4>${p.name}</h4>
-                    <div class="proj-meta">${p.description || 'Sem descrição'} • Branch: ${p.github_branch || 'N/A'}</div>
-                    <div class="proj-meta" style="margin-top:5px">Atualizado em: ${new Date(p.updated_at).toLocaleDateString('pt-BR')}</div>
-                </div>
-                <span class="status-badge" style="background:${p.color_hex}20; color:${p.color_hex}; border:1px solid ${p.color_hex}40">
-                    ${p.status_label}
-                </span>
-            </div>
-        `).join('');
-    }
-
-    // --- MODAL & CRIAÇÃO ---
-    function openModal() { document.getElementById('projectModal').classList.add('active'); }
-    function closeModal() { 
-        document.getElementById('projectModal').classList.remove('active');
-        ['projName','projBranch','projDesc'].forEach(id => document.getElementById(id).value = '');
-    }
-
-    async function submitProject() {
-        const btn = event.target;
-        const originalText = btn.innerText;
-        btn.innerText = 'Enviando...';
-        btn.disabled = true;
-
-        const payload = {
-            name: document.getElementById('projName').value,
-            status_label: document.getElementById('projStatus').value,
-            github_branch: document.getElementById('projBranch').value,
-            description: document.getElementById('projDesc').value
-        };
-
-        try {
-            const res = await fetch(API_URL, {
+            const resp = await fetch(API, {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${currentToken}`
-                },
-                body: JSON.stringify(payload)
+                headers: { 'Content-Type':'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({
+                    name: file.name,
+                    description: `Upload via Admin (${ext})`,
+                    file_type: ext,          // Novo campo do schema
+                    size_bytes: file.size,   // Novo campo do schema
+                    status_label: 'Criados'
+                })
             });
-            const data = await res.json();
-            if(data.success) {
-                closeModal();
-                loadProjects();
-            } else {
-                alert('Erro: ' + data.error);
-            }
-        } catch(err) {
-            alert('Falha na conexão: ' + err.message);
-        } finally {
-            btn.innerText = originalText;
-            btn.disabled = false;
-        }
+            const data = await resp.json();
+            if(data.success) uploaded++;
+        } catch(e) { console.error(e); }
     }
+    
+    if(uploaded > 0) {
+        showToast(`☁️ ${uploaded} arquivo(s) enviado(s)!`);
+        loadProjects(); // Recarrega lista
+    } else {
+        showToast('⚠️ Nenhum arquivo válido encontrado.', 'error');
+    }
+}
 
-    // Carrega ao iniciar se tiver token
-    if(currentToken) loadProjects();
+// --- CARREGAMENTO E FILTRO ---
+async function loadProjects() {
+    if(!token) return;
+    document.getElementById('loading').style.display = 'block';
+    
+    try {
+        const res = await fetch(API, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if(data.success) {
+            allProjects = data.data; // Salva na memória RAM
+            renderData(allProjects);
+        }
+    } catch(e) { showToast('Erro de conexão', 'error'); }
+    finally { document.getElementById('loading').style.display = 'none'; }
+}
+
+function filterProjects() {
+    const term = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = allProjects.filter(p => 
+        p.name.toLowerCase().includes(term) || 
+        (p.file_type && p.file_type.includes(term))
+    );
+    renderData(filtered);
+}
+
+function renderData(projects) {
+    // Atualiza Stats
+    const counts = {'Criando':0,'Em Uso':0,'Criados':0};
+    projects.forEach(p => { if(counts[p.status_label]!==undefined) counts[p.status_label]++; });
+    
+    document.getElementById('countTotal').innerText = projects.length;
+    document.getElementById('countCriando').innerText = counts['Criando'];
+    document.getElementById('countEmUso').innerText = counts['Em Uso'];
+    document.getElementById('countCriados').innerText = counts['Criados'];
+    
+    // Renderiza Lista
+    document.getElementById('projectList').innerHTML = projects.map(p => `
+        <div class="proj-item">
+            <div class="proj-info">
+                <div class="proj-name">${p.name}</div>
+                <div class="proj-meta">
+                    <span>${p.file_type || '?'}</span>
+                    <span>${formatBytes(p.size_bytes)}</span>
+                    <span>${new Date(p.updated_at).toLocaleDateString()}</span>
+                </div>
+            </div>
+            <span class="badge" style="background:${p.color_hex}20;color:${p.color_hex};border:1px solid ${p.color_hex}40">${p.status_label}</span>
+        </div>
+    `).join('');
+}
+
+function formatBytes(bytes) {
+    if (!bytes || bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.borderColor = type==='error' ? '#f85149' : '#238636';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+if(token) loadProjects();
 </script>
-
 </body>
 </html>

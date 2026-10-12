@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛋️ Sala VIP | OmniHub Collaborative</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:;">
+    <style>
+        :root { 
+            --bg: #0d1117; --card: #161b22; --text: #c9d1d9; 
+            --accent: #58a6ff; --vip-gold: #d29922; --border: #30363d;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+        body { background: var(--bg); color: var(--text); height: 100vh; display: flex; overflow: hidden; }
+        
+        /* SIDEBAR DE CONVIDADOS */
+        .sidebar { width: 260px; background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .vip-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+        .vip-title { font-size: 1.1rem; font-weight: bold; color: var(--vip-gold); }
+        .guest-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .guest-item { padding: 12px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .guest-item:hover { background: rgba(88, 166, 255, 0.1); }
+        .guest-item.active { background: rgba(210, 153, 34, 0.1); border-color: var(--vip-gold); color: var(--vip-gold); }
+        .guest-name { font-weight: 600; font-size: 0.9rem; }
+        .guest-role { font-size: 0.75rem; opacity: 0.7; margin-top: 2px; }
+        
+        /* ÁREA PRINCIPAL */
+        .main-area { flex: 1; display: flex; flex-direction: column; position: relative; }
+        
+        /* CHAT / COLABORAÇÃO */
+        .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .message { max-width: 80%; padding: 12px 16px; border-radius: 12px; font-size: 0.95rem; line-height: 1.5; animation: fadeIn 0.3s ease; }
+        .message.user { align-self: flex-end; background: var(--accent); color: #fff; border-bottom-right-radius: 2px; }
+        .message.ai { align-self: flex-start; background: var(--card); border: 1px solid var(--border); border-bottom-left-radius: 2px; }
+        .msg-meta { font-size: 0.7rem; opacity: 0.6; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+        
+        /* INPUT AREA */
+        .input-area { padding: 20px; background: var(--card); border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: center; }
+        .input-wrapper { flex: 1; position: relative; }
+        textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 8px; resize: none; outline: none; min-height: 50px; max-height: 150px; font-family: inherit; }
+        textarea:focus { border-color: var(--accent); }
+        .send-btn { background: var(--vip-gold); color: #000; border: none; padding: 0 20px; height: 50px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .send-btn:hover { filter: brightness(1.1); }
+        
+        /* CONTEXT BAR (Dados do Hub) */
+        .context-bar { padding: 10px 20px; background: rgba(210, 153, 34, 0.05); border-bottom: 1px solid var(--border); font-size: 0.8rem; color: var(--vip-gold); display: flex; justify-content: space-between; align-items: center; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR: CONVIDADOS DA SALA VIP -->
+<div class="sidebar">
+    <div class="vip-header">
+        <span style="font-size:1.5rem">🛋️</span>
+        <div class="vip-title">SALA VIP</div>
+    </div>
+    <div class="guest-list">
+        <div class="guest-item active" onclick="selectGuest(this, 'qwen-main')">
+            <div class="guest-name">🧠 Qwen Principal</div>
+            <div class="guest-role">Orquestrador & Contexto Geral</div>
+        </div>
+        <div class="guest-item" onclick="selectGuest(this, 'qwen-vl')">
+            <div class="guest-name">👁️ Qwen Vision</div>
+            <div class="guest-role">Análise de Imagens & UI</div>
+        </div>
+        <div class="guest-item" onclick="selectGuest(this, 'qwen-coder')">
+            <div class="guest-name"> Qwen Coder</div>
+            <div class="guest-role">Geração & Debug de Código</div>
+        </div>
+        <div class="guest-item" onclick="selectGuest(this, 'human-guest')">
+            <div class="guest-name">👤 Convidado Humano</div>
+            <div class="guest-role">Colaboração Externa</div>
+        </div>
+    </div>
+    
+    <div style="padding:15px; border-top:1px solid var(--border);">
+        <button onclick="clearChat()" style="width:100%; background:transparent; border:1px solid var(--border); color:var(--text); padding:8px; border-radius:6px; cursor:pointer; font-size:0.8rem;">🗑️ Limpar Sessão</button>
+    </div>
+</div>
+
+<!-- ÁREA DE COLABORAÇÃO -->
+<div class="main-area">
+    <div class="context-bar">
+        <span id="activeGuest">Conversando com: Qwen Principal</span>
+        <span id="hubStatus"> Hub D1: Conectado</span>
+    </div>
+    
+    <div class="chat-container" id="chatContainer">
+        <div class="message ai">
+            <div class="msg-meta">🧠 Qwen Principal • Agora</div>
+            Bem-vindo à Sala VIP! Estou conectado ao seu OmniHub (D1). Posso ver seus projetos, analisar imagens ou ajudar com código. Quem mais você gostaria de trazer para esta sessão?
+        </div>
+    </div>
+    
+    <div class="input-area">
+        <div class="input-wrapper">
+            <textarea id="msgInput" placeholder="Digite sua mensagem... (Shift+Enter para nova linha)" onkeydown="handleKey(event)"></textarea>
+        </div>
+        <button class="send-btn" onclick="sendMessage()">Enviar</button>
+    </div>
+</div>
+
+<script>
+// ============ CONFIGURAÇÃO ============
+const API_URL = 'https://hub-ias.hdmicro-ml.workers.dev/api/projects';
+let currentToken = localStorage.getItem('omnihub_token') || '';
+let activeGuestId = 'qwen-main';
+let chatHistory = [];
+
+// ============ NAVEGAÇÃO DE CONVIDADOS ============
+function selectGuest(el, guestId) {
+    document.querySelectorAll('.guest-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    activeGuestId = guestId;
+    
+    const names = {
+        'qwen-main': 'Qwen Principal',
+        'qwen-vl': 'Qwen Vision', 
+        'qwen-coder': 'Qwen Coder',
+        'human-guest': 'Convidado Humano'
+    };
+    document.getElementById('activeGuest').textContent = `Conversando com: ${names[guestId]}`;
+    
+    // Adiciona mensagem de sistema ao trocar
+    addMessage('system', `Você mudou para ${names[guestId]}. O contexto do Hub permanece ativo.`);
+}
+
+// ============ MENSAGENS ============
+function addMessage(type, text, meta = '') {
+    const container = document.getElementById('chatContainer');
+    const div = document.createElement('div');
+    
+    if (type === 'system') {
+        div.className = 'message';
+        div.style.alignSelf = 'center';
+        div.style.background = 'transparent';
+        div.style.color = 'var(--subtext)';
+        div.style.fontSize = '0.8rem';
+        div.style.fontStyle = 'italic';
+        div.textContent = text;
+    } else {
+        div.className = `message ${type}`;
+        const icons = { user: '👤', 'qwen-main': '🧠', 'qwen-vl': '👁️', 'qwen-coder': '💻', 'human-guest': '👥' };
+        div.innerHTML = `
+            <div class="msg-meta">${icons[type] || '🤖'} ${getGuestName(type)} • ${new Date().toLocaleTimeString()}</div>
+            ${text.replace(/\n/g, '<br>')}
+        `;
+    }
+    
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+    chatHistory.push({ type, text, timestamp: new Date().toISOString() });
+}
+
+function getGuestName(type) {
+    if (type === 'user') return 'Você';
+    const names = { 'qwen-main': 'Qwen Principal', 'qwen-vl': 'Qwen Vision', 'qwen-coder': 'Qwen Coder', 'human-guest': 'Convidado' };
+    return names[type] || 'IA';
+}
+
+// ============ ENVIO E INTEGRAÇÃO HUB ============
+async function sendMessage() {
+    const input = document.getElementById('msgInput');
+    const text = input.value.trim();
+    if (!text) return;
+    
+    addMessage('user', text);
+    input.value = '';
+    
+    // Simulação de resposta contextual baseada no convidado ativo
+    // Em produção, isso chamaria a API real do Worker com routing por agente
+    setTimeout(() => {
+        let response = '';
+        if (activeGuestId === 'qwen-coder') {
+            response = `💻 [Qwen Coder]: Analisando seu pedido sobre "${text.substring(0, 30)}..." \n\nPosso gerar código Python/JS para isso. Quer que eu crie um snippet e registre no Hub como "Criando"?`;
+        } else if (activeGuestId === 'qwen-vl') {
+            response = `️ [Qwen Vision]: Pronto para análise visual. Arraste uma imagem aqui ou descreva o que precisa identificar nos seus projetos.`;
+        } else {
+            response = ` [Qwen Principal]: Entendido. Tenho acesso aos seus ${document.getElementById('hubStatus').textContent.includes('Conectado') ? 'projetos no D1' : 'dados locais'}. Como posso ajudar a organizar ou criar algo novo hoje?`;
+        }
+        addMessage(activeGuestId, response);
+    }, 800);
+    
+    // Se mencionar "hub" ou "projeto", busca dados reais
+    if (text.toLowerCase().includes('hub') || text.toLowerCase().includes('projeto')) {
+        fetchHubData();
+    }
+}
+
+async function fetchHubData() {
+    if (!currentToken) {
+        addMessage('system', '⚠️ Token não configurado. Cole seu ADMIN_TOKEN para acessar dados do Hub.');
+        const t = prompt('ADMIN_TOKEN:');
+        if (t) { localStorage.setItem('omnihub_token', t); currentToken = t; }
+        else return;
+    }
+    
+    try {
+        const res = await fetch(API_URL, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+        const data = await res.json();
+        if (data.success) {
+            addMessage('system', `📊 Dados do Hub carregados: ${data.count} projetos encontrados no D1.`);
+        }
+    } catch(e) {
+        addMessage('system', '❌ Falha ao buscar dados do Hub.');
+    }
+}
+
+function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+}
+
+function clearChat() {
+    if (confirm('Limpar toda a sessão da Sala VIP?')) {
+        document.getElementById('chatContainer').innerHTML = '';
+        chatHistory = [];
+        addMessage('ai', 'Sessão limpa. Bem-vindo de volta à Sala VIP!');
+    }
+}
+
+// Inicialização
+if (currentToken) fetchHubData();
+</script>
+</body>
+</html>

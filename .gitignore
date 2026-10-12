@@ -1,23 +1,77 @@
-# Dados Locais e Banco de Dados
+# ==========================================
+# DADOS LOCAIS E BANCO DE DADOS (CRÍTICO)
+# ==========================================
 *.db
 *.sqlite
+*.sqlite3
 data/
 logs/
+temp/
 
-# Configurações Sensíveis
+# ==========================================
+# CONFIGURAÇÕES SENSÍVEIS E SEGREDOS
+# ==========================================
 .env
 .env.local
+.env.production
 config/secrets.json
+config/credentials.json
+*.pem
+*.key
 
-# Ambientes Virtuais Python
+# ==========================================
+# AMBIENTES VIRTUAIS PYTHON
+# ==========================================
 venv/
 env/
 .venv/
+ENV/
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Arquivos de Sistema e IDE
+# ==========================================
+# ARQUIVOS DE SISTEMA E IDE
+# ==========================================
 .DS_Store
 Thumbs.db
+desktop.ini
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+.mypy_cache/
+.pytest_cache/
+.hypothesis/
+
+# ==========================================
+# CLOUDFLARE & BUILD ARTIFACTS
+# ==========================================
+.wrangler/
+.dev.vars
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
