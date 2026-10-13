@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia do Nanico | Passo a Passo Seguro</title>
+    
+    <!-- Fonte Robusta e Simples (Open Sans é excelente para dislexia/TEA) -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           DESIGN NEUROINCLUSIVO (TEA Friendly)
+           Princípios: Baixa Saturação, Alta Legibilidade, 
+           Sem Piscar, Feedback Claro, Passos Curtos.
+           ========================================= */
+        
+        :root {
+            /* Paleta Suave (Evita estímulo visual excessivo) */
+            --bg-calmo: #f0f4f8;      /* Azul acinzentado claro */
+            --painel-branco: #ffffff;
+            --texto-principal: #2d3748; /* Cinza escuro, não preto puro */
+            --texto-suave: #718096;
+            --destaque-verde: #38b2ac;  /* Verde água calmante */
+            --borda-sutil: #e2e8f0;
+            
+            /* Tipografia Acessível */
+            --fonte-base: 'Open Sans', sans-serif;
+            --tamanho-letra: 1.2rem; /* Maior que o padrão */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background-color: var(--bg-calmo);
+            color: var(--texto-principal);
+            font-family: var(--fonte-base);
+            line-height: 1.8; /* Espaçamento generoso entre linhas */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* HEADER SIMPLES E ESTÁTICO */
+        header {
+            background: var(--painel-branco);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--borda-sutil);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02); /* Sombra quase imperceptível */
+        }
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--texto-principal);
+            margin-bottom: 5px;
+        }
+        .instrucao-clara {
+            font-size: 1rem;
+            color: var(--texto-suave);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* CONTAINER PRINCIPAL */
+        main {
+            flex: 1;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* PASSOS NUMERADOS (Previsibilidade) */
+        .step-container {
+            background: var(--painel-branco);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid var(--borda-sutil);
+            position: relative;
+        }
+
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: var(--destaque-verde);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .step-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--texto-principal);
+            margin-bottom: 10px;
+            margin-top: 10px;
+        }
+
+        .step-desc {
+            font-size: 1.1rem;
+            color: var(--texto-suave);
+            line-height: 1.6;
+        }
+
+        .action-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: var(--destaque-verde);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        .action-btn:hover {
+            background: #2c7a7b;
+        }
+
+        /* RODAPÉ */
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9rem;
+            color: var(--texto-suave);
+            background: var(--painel-branco);
+            border-top: 1px solid var(--borda-sutil);
+        }
+
+        /* RESPONSIVIDADE */
+        @media (max-width: 600px) {
+            .step-container { padding: 20px; }
+            h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Guia do Nanico</h1>
+    <p class="instrucao-clara">Passo a passo simples para começar no mundo digital.</p>
+</header>
+
+<main>
+    <!-- PASSO 1 -->
+    <div class="step-container">
+        <div class="step-number">1</div>
+        <h2 class="step-title">Tenha um Celular Ligado</h2>
+        <p class="step-desc">Certifique-se de que seu aparelho está carregado e conectado à internet (Wi-Fi ou Dados Móveis).</p>
+    </div>
+
+    <!-- PASSO 2 -->
+    <div class="step-container">
+        <div class="step-number">2</div>
+        <h2 class="step-title">Abra o Navegador</h2>
+        <p class="step-desc">Toque no ícone azul (Chrome) ou laranja (Firefox/Safari) na tela inicial.</p>
+    </div>
+
+    <!-- PASSO 3 -->
+    <div class="step-container">
+        <div class="step-number">3</div>
+        <h2 class="step-title">Digite o Endereço</h2>
+        <p class="step-desc">Na barra de cima, digite: <strong>hub-ias.pages.dev</strong> e aperte Enter.</p>
+    </div>
+
+    <!-- PASSO 4 -->
+    <div class="step-container">
+        <div class="step-number">4</div>
+        <h2 class="step-title">Escolha uma Ferramenta</h2>
+        <p class="step-desc">Você verá botões grandes e coloridos. Toque em um deles para abrir.</p>
+        <a href="./recibo-certo.html" class="action-btn">Testar Recibo Certo</a>
+        <a href="./gerador-posts.html" class="action-btn" style="margin-left:10px;">Testar Gerador de Posts</a>
+    </div>
+
+    <!-- PASSO 5 -->
+    <div class="step-container">
+        <div class="step-number">5</div>
+        <h2 class="step-title">Não Tenha Medo</h2>
+        <p class="step-desc">Se errar, feche e abra de novo. Nada vai quebrar. Estamos aqui para ajudar você.</p>
+    </div>
+</main>
+
+<footer>
+    © 2026 FamíliaHDMicro | Design Pensado para Todas as Mentes 💙<br>
+    <a href="../index.html" style="color:var(--destaque-verde); text-decoration:none;">Voltar para Início</a>
+</footer>
+
+</body>
+</html>
