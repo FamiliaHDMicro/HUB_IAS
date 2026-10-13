@@ -2,152 +2,156 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HDMicro Hub | Ferramentas para Quem Constrói</title>
-    <style>
-        :root { --bg: #f4f7f6; --card: #ffffff; --text: #2c3e50; --accent: #1e8449; --gray: #7f8c8d; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg); color: var(--text); line-height: 1.6; }
-        
-        /* HEADER */
-        header { background: var(--accent); color: white; padding: 20px; text-align: center; }
-        header h1 { font-size: 1.5rem; margin-bottom: 5px; }
-        header p { font-size: 0.9rem; opacity: 0.9; }
-
-        /* GRID DE PRODUTOS */
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        
-        /* CARD DO APP */
-        .app-card { 
-            background: var(--card); border-radius: 12px; overflow: hidden; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s;
-            display: flex; flex-direction: column; height: 100%;
-        }
-        .app-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
-        
-        .app-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; }
-        .app-icon { font-size: 2rem; }
-        .app-title { font-weight: bold; font-size: 1.1rem; color: var(--accent); }
-        
-        .app-body { padding: 15px; flex: 1; }
-        .app-desc { font-size: 0.9rem; color: var(--gray); margin-bottom: 15px; }
-        
-        .app-footer { padding: 15px; background: #fafafa; border-top: 1px solid #eee; }
-        
-        /* BOTÕES DE AÇÃO */
-        .btn-web, .btn-download { 
-            width: 100%; padding: 12px; border: none; border-radius: 6px; 
-            font-weight: bold; cursor: pointer; text-align: center; text-decoration: none;
-            display: block; margin-bottom: 8px; transition: 0.2s;
-        }
-        .btn-web { background: var(--accent); color: white; }
-        .btn-web:hover { background: #145a32; }
-        
-        .btn-download { background: #34495e; color: white; }
-        .btn-download:hover { background: #2c3e50; }
-
-        .tag { font-size: 0.7rem; background: #eee; color: #555; padding: 2px 6px; border-radius: 4px; margin-right: 5px; }
-        
-        footer { text-align: center; padding: 20px; font-size: 0.8rem; color: var(--gray); margin-top: 40px; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SoCialBR | Conecte • Converse • Com Segurança</title>
+    
+    <!-- Estilos Separados -->
+    <link rel="stylesheet" href="./style.css">
+    
+    <!-- Favicon Rápido -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔒</text></svg>">
 </head>
-<body>
+<body data-theme="zumbi">
 
-<header>
-    <h1>🛡️ HDMicro Hub</h1>
-    <p>Ferramentas leves, gratuitas e dignas para autônomos e criadores.</p>
+<!-- HEADER FIXO -->
+<header id="mainHeader">
+    <div class="logo-area">
+        <span class="brand-icon">S</span>
+        <div class="brand-text">
+            <h1>SoCialBR</h1>
+            <small>vFINAL • Alma Completa</small>
+        </div>
+    </div>
+    
+    <div class="header-actions">
+        <button id="themeToggleBtn" class="btn-icon" title="Trocar Tema">🎨</button>
+        <button id="logoutBtn" class="btn-icon hidden" title="Sair">🚪</button>
+    </div>
 </header>
 
-<div class="container">
-    <div class="grid" id="appsGrid">
-        <!-- Os cards serão gerados via JavaScript abaixo -->
-    </div>
-</div>
-
-<footer>
-    © 2026 FamiliaHDMicro | Feito com ❤️ e Hardware Limitado.<br>
-    Apoie o projeto: <a href="https://mpago.la/2zbECPA" style="color:var(--accent); font-weight:bold;">R$ 9,00 Vitalício</a>
-</footer>
-
-<script>
-// ============ BANCO DE DADOS LOCAL DOS APPS ============
-// Edite esta lista conforme você adiciona novos projetos.
-const APPS_LIST = [
-    {
-        id: 'recibo-certo',
-        icon: '📝',
-        title: 'Recibo Certo',
-        desc: 'Gere recibos digitais e orçamentos em 30 segundos. Envie direto no WhatsApp do cliente.',
-        tags: ['Web App', 'Autônomo', 'Grátis'],
-        type: 'web', // Abre link
-        url: 'https://recibo-certo.pages.dev' // Substitua pelo link real quando subir
-    },
-    {
-        id: 'salavip',
-        icon: '🛋️',
-        title: 'Sala VIP (Registro IA)',
-        desc: 'Organize suas conversas com IAs (Qwen, Claude, Gemini). Cole respostas e crie histórico visual.',
-        tags: ['Web App', 'Produtividade'],
-        type: 'web',
-        url: 'https://sala-vip-hdmicro.pages.dev' // Substitua pelo link real
-    },
-    {
-        id: 'criador-universal',
-        icon: '⚡',
-        title: 'Criador Universal Offline',
-        desc: 'Editor de código sandbox. Gere scripts Python, HTML, BAT sem internet. Seguro e rápido.',
-        tags: ['Download', 'Dev Tool'],
-        type: 'download', // Baixa arquivo
-        file_url: './criador_universal.html', // Caminho relativo se estiver hospedado junto
-        filename: 'criador_universal.html'
-    },
-    {
-        id: 'admin-panel',
-        icon: '🧠',
-        title: 'Painel Admin Curador',
-        desc: 'Gerencie seus arquivos locais e registre metadados no banco D1 da Cloudflare.',
-        tags: ['Download', 'Admin'],
-        type: 'download',
-        file_url: './admin.html',
-        filename: 'admin.html'
-    }
-];
-
-// ============ RENDERIZAÇÃO DA VITRINE ============
-function renderApps() {
-    const grid = document.getElementById('appsGrid');
+<!-- ÁREA PRINCIPAL DE CONTEÚDO -->
+<main id="appContent">
     
-    if(APPS_LIST.length === 0) {
-        grid.innerHTML = '<p>Nenhum app cadastrado ainda.</p>';
-        return;
-    }
-
-    grid.innerHTML = APPS_LIST.map(app => `
-        <div class="app-card">
-            <div class="app-header">
-                <span class="app-icon">${app.icon}</span>
-                <span class="app-title">${app.title}</span>
-            </div>
-            <div class="app-body">
-                <p class="app-desc">${app.desc}</p>
-                <div style="margin-top:10px;">
-                    ${app.tags.map(t => `<span class="tag">${t}</span>`).join('')}
-                </div>
-            </div>
-            <div class="app-footer">
-                ${app.type === 'web' ? 
-                    `<a href="${app.url}" target="_blank" class="btn-web">🚀 Abrir App Online</a>` :
-                    `<a href="${app.file_url}" download="${app.filename}" class="btn-download">💾 Baixar Arquivo</a>`
-                }
+    <!-- TELA DE LOGIN / REGISTRO -->
+    <section id="authScreen" class="screen active">
+        <div class="card auth-card">
+            <h2>Bem-vindo à Comunidade 🔒</h2>
+            <p>Acesso restrito por convite ou registro direto.</p>
+            
+            <form id="loginForm">
+                <input type="text" id="usernameInput" placeholder="Seu Nome (Ex: João Pintor)" required maxlength="40">
+                <button type="submit" class="btn-primary w-full">ENTRAR NA SALA VIP</button>
+            </form>
+            
+            <div class="divider">OU</div>
+            
+            <div class="invite-box">
+                <label>Já tem um convite?</label>
+                <input type="text" id="inviteTokenInput" placeholder="Cole o Token do Convite aqui...">
+                <button id="joinWithInviteBtn" class="btn-secondary w-full mt-2">ACEITAR CONVITE</button>
             </div>
         </div>
-    `).join('');
-}
+    </section>
 
-// Inicializa ao carregar
-document.addEventListener('DOMContentLoaded', renderApps);
-</script>
+    <!-- FEED PRINCIPAL (Visível após login) -->
+    <section id="feedScreen" class="screen hidden">
+        
+        <!-- Barra de Navegação Superior (Abas) -->
+        <nav class="tabs-nav">
+            <button class="tab-btn active" data-target="gruposTab">🏠 Grupos</button>
+            <button class="tab-btn" data-target="criarTab">➕ Criar</button>
+            <button class="tab-btn" data-target="perfilTab">👤 Perfil</button>
+        </nav>
+
+        <!-- Conteúdo das Abas -->
+        <div class="tab-content-wrapper">
+            
+            <!-- ABAS: LISTA DE GRUPOS -->
+            <div id="gruposTab" class="tab-pane active">
+                <div class="section-header">
+                    <h3>Minhas Comunidades</h3>
+                    <span id="groupCountBadge" class="badge">0 grupos</span>
+                </div>
+                <div id="groupsListContainer" class="list-container">
+                    <div class="empty-state">Carregando seus grupos...</div>
+                </div>
+            </div>
+
+            <!-- ABAS: CRIAR NOVO -->
+            <div id="criarTab" class="tab-pane hidden">
+                <div class="card form-card">
+                    <h3>Criar Novo Grupo 🌱</h3>
+                    <form id="createGroupForm">
+                        <label>Nome do Grupo</label>
+                        <input type="text" id="newGroupName" placeholder="Ex: Mutirão Reforma Centro" required>
+                        
+                        <label>Tipo de Acesso</label>
+                        <select id="newGroupType">
+                            <option value="aberto">Aberto (Qualquer um entra)</option>
+                            <option value="fechado">Fechado (Só com convite)</option>
+                        </select>
+                        
+                        <button type="submit" class="btn-primary w-full mt-4">CRIAR AGORA</button>
+                    </form>
+                    
+                    <hr class="my-4 border-line">
+                    
+                    <h3>Gerar Convite Rápido 🎟️</h3>
+                    <p class="text-sm opacity-70">Selecione um grupo abaixo para gerar um link de convite temporário (validade 7 dias).</p>
+                    <select id="inviteTargetGroup" class="w-full my-2"></select>
+                    <button id="generateInviteBtn" class="btn-secondary w-full">GERAR LINK DE CONVITE</button>
+                    <div id="inviteResultBox" class="result-box hidden mt-3">
+                        <code id="generatedInviteLink"></code>
+                        <button id="copyInviteBtn" class="btn-small mt-2">COPIAR</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABAS: PERFIL -->
+            <div id="perfilTab" class="tab-pane hidden">
+                <div class="card profile-card">
+                    <div class="profile-avatar-large">
+                        <span id="profileInitials">JD</span>
+                    </div>
+                    <h2 id="profileNameDisplay">Usuário</h2>
+                    <p class="opacity-60 text-center">Membro desde: <span id="profileCreatedAt">--/--/----</span></p>
+                    
+                    <div class="stats-grid mt-4">
+                        <div class="stat-item">
+                            <strong id="statGroupsJoined">0</strong>
+                            <small>Grupos</small>
+                        </div>
+                        <div class="stat-item">
+                            <strong id="statPostsMade">0</strong>
+                            <small>Posts</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+</main>
+
+<!-- FOOTER / NAV INFERIOR MOBILE -->
+<nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchMobileTab('gruposTab')">
+        <span class="nav-icon">🏠</span>
+        <span>Início</span>
+    </button>
+    <button class="nav-item" onclick="switchMobileTab('criarTab')">
+        <span class="nav-icon">➕</span>
+        <span>Criar</span>
+    </button>
+    <button class="nav-item" onclick="switchMobileTab('perfilTab')">
+        <span class="nav-icon">👤</span>
+        <span>Perfil</span>
+    </button>
+</nav>
+
+<!-- SCRIPTS -->
+<script src="./app.js"></script>
 
 </body>
 </html>
