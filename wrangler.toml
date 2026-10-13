@@ -1,0 +1,10 @@
+name = "socialbr-pages"
+compatibility_date = "2024-01-01"
+
+# Aponta automaticamente para a pasta functions/ criada acima
+# Não precisa de 'main' aqui se for só Pages Functions
+
+[[d1_databases]]
+binding = "DB"
+database_name = "socialbr" # Nome exato do seu banco D1
+database_id = "91c71bb9-46e4-4052-b7e5-7572ec26d857" # ID REAL DO BANCO
