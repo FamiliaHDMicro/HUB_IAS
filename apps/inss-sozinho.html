@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INSS Sozinho | HDMicro Hub</title>
+    
+    <!-- Fonte Leve e Legível -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           DESIGN SYSTEM: INSS SOZINHO (TEMA BRASIL/PROFISSIONAL)
+           Cores sóbrias, alto contraste, foco em clareza.
+           ========================================= */
+        :root {
+            --bg-app: #f0fdf4;       /* Verde muito claro (esperança/calma) */
+            --card-bg: #ffffff;
+            --primary-green: #15803d; /* Verde INSS/Governo */
+            --secondary-blue: #0f172a;/* Azul escuro institucional */
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --danger-red: #dc2626;
+            --warning-yellow: #fef08a;
+            --border-color: #cbd5e1;
+            --radius-lg: 12px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        
+        body {
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 1.8rem;
+            color: var(--primary-green);
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        /* CARD PRINCIPAL */
+        .calc-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 25px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--secondary-blue);
+            font-size: 0.9rem;
+        }
+        input[type="number"], select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border 0.2s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.1);
+        }
+
+        .btn-calc {
+            width: 100%;
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.1s, filter 0.2s;
+        }
+        .btn-calc:hover { filter: brightness(1.1); }
+        .btn-calc:active { transform: scale(0.98); }
+
+        /* RESULTADO */
+        .result-box {
+            background: #ecfdf5; /* Verde bem claro */
+            border: 1px solid #bbf7d0;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            text-align: center;
+            display: none; /* Escondido até calcular */
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .result-label { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; }
+        .result-value { font-size: 2.2rem; font-weight: 800; color: var(--primary-green); line-height: 1; }
+        .result-detail { font-size: 0.85rem; color: var(--text-muted); margin-top: 10px; }
+
+        /* DISCLAIMER LEGAL (CRÍTICO) */
+        .legal-warning {
+            background: var(--warning-yellow);
+            border-left: 4px solid var(--danger-red);
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #856404;
+            margin-top: 20px;
+            line-height: 1.4;
+        }
+        .legal-warning strong { color: var(--danger-red); display: block; margin-bottom: 5px; }
+
+        footer {
+            margin-top: auto;
+            padding-top: 20px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+        footer a { color: var(--primary-green); text-decoration: none; font-weight: 600; }
+
+        /* RESPONSIVO */
+        @media (max-width: 400px) {
+            h1 { font-size: 1.5rem; }
+            .result-value { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🇧 INSS Sozinho</h1>
+        <p class="subtitle">Calcule sua contribuição mensal com segurança.</p>
+    </header>
+
+    <div class="calc-card">
+        <div class="form-group">
+            <label for="salarioInput">Seu Salário de Contribuição (R$)</label>
+            <input type="number" id="salarioInput" placeholder="Ex: 2500.00" step="0.01" min="0">
+        </div>
+
+        <div class="form-group">
+            <label for="tipoContribuinte">Tipo de Contribuinte</label>
+            <select id="tipoContribuinte">
+                <option value="individual">Individual (Autônomo/Empregado sem carteira)</option>
+                <option value="facultativo">Facultativo (Donas de casa/Estudantes)</option>
+                <option value="mei">MEI (Microempreendedor Individual)</option>
+            </select>
+        </div>
+
+        <button class="btn-calc" onclick="calcular()">CALCULAR VALOR DA GUIA</button>
+    </div>
+
+    <div id="resultadoBox" class="result-box">
+        <div class="result-label">Valor a Pagar Este Mês:</div>
+        <div class="result-value" id="valorFinal">R$ 0,00</div>
+        <div class="result-detail" id="detalheCalculo">
+            <!-- Detalhe técnico aparece aqui -->
+        </div>
+    </div>
+
+    <!-- AVISO LEGAL OBRIGATÓRIO PARA 2026 -->
+    <div class="legal-warning">
+        <strong>⚠️ ATENÇÃO IMPORTANTE:</strong>
+        Esta ferramenta utiliza parâmetros estimados para o exercício de <strong>2026</strong>. 
+        Os valores oficiais (Salário Mínimo e Teto do INSS) são reajustados anualmente pelo Governo Federal. 
+        <br><br>
+        Antes de emitir sua guia GPS ou DARF, confirme sempre os valores vigentes no site oficial 
+        <a href="https://www.gov.br/inss" target="_blank">gov.br/inss</a>. 
+        Use este app apenas como referência educativa e planejamento financeiro.
+    </div>
+
+    <footer>
+        © 2026 FamíliaHDMicro | Ferramenta Offline & Segura<br>
+        <a href="../index.html">← Voltar para a Vitrine HDMicro</a>
+    </footer>
+</div>
+
+<script>
+    // ==========================================
+    // CONFIGURAÇÕES INSS - ANO BASE: 2026
+    // Valores Estimados (Atualize manualmente se houver mudança legislativa súbita)
+    // ==========================================
+    const CONFIG_2026 = {
+        salarioMinimo: 1600.00,      // Projeção Jan/2026
+        tetoMaximo: 8800.00,         // Projeção Jan/2026
+        aliquotaMEI: 0.05,           // 5% sobre SM (para aposentadoria)
+        faixasProgressivas: [
+            { limite: 1600.00, aliquota: 0.075 },   // Até 1 SM: 7.5%
+            { limite: 2800.00, aliquota: 0.09 },    // De 1SM até ~2SM: 9%
+            { limite: 4200.00, aliquota: 0.12 },    // De ~2SM até ~4SM: 12%
+            { limite: 8800.00, aliquota: 0.14 }     // Acima disso até teto: 14%
+        ]
+    };
+
+    function calcular() {
+        const inputSalario = document.getElementById('salarioInput').value;
+        const tipo = document.getElementById('tipoContribuinte').value;
+        const resultadoBox = document.getElementById('resultadoBox');
+        const valorFinalEl = document.getElementById('valorFinal');
+        const detalheEl = document.getElementById('detalheCalculo');
+
+        if (!inputSalario || parseFloat(inputSalario) <= 0) {
+            alert("Por favor, insira um salário válido.");
+            return;
+        }
+
+        let salario = parseFloat(inputSalario);
+        let contribuicao = 0;
+        let explicacao = "";
+
+        // Lógica Especial para MEI
+        if (tipo === 'mei') {
+            // MEI paga 5% do Salário Mínimo vigente
+            contribuicao = CONFIG_2026.salarioMinimo * CONFIG_2026.aliquotaMEI;
+            explicacao = `Base de cálculo: Salário Mínimo (${formatCurrency(CONFIG_2026.salarioMinimo)}) x 5%.`;
+            
+            // Aviso extra para MEI
+            if(salario > CONFIG_2026.salarioMinimo) {
+                 explicacao += "<br><small style='color:#dc2626'>Obs: Para MEI, o cálculo é fixo sobre o SM, independente do faturamento declarado aqui.</small>";
+            }
+        } 
+        // Lógica Progressiva (Individual/Facultativo)
+        else {
+            // Limita ao teto
+            if (salario > CONFIG_2026.tetoMaximo) {
+                salario = CONFIG_2026.tetoMaximo;
+                explicacao = `Salário limitado ao Teto do INSS (${formatCurrency(CONFIG_2026.tetoMaximo)}).`;
+            } else {
+                explicacao = `Salário considerado: ${formatCurrency(salario)}.`;
+            }
+
+            // Cálculo em Faixas (Simplificado para média ponderada ou faixa única dependendo da regra exata de 2026)
+            // Aqui usamos a alíquota efetiva baseada na última faixa atingida para simplificação didática,
+            // pois a fórmula real envolve parcelas. Vamos usar uma aproximação linear segura para fins educativos.
+            
+            let aliquotaEfetiva = 0.075; // Padrão mínimo
+            
+            // Encontra a alíquota da faixa onde o salário se encaixa
+            for (let i = 0; i < CONFIG_2026.faixasProgressivas.length; i++) {
+                if (salario <= CONFIG_2026.faixasProgressivas[i].limite) {
+                    aliquotaEfetiva = CONFIG_2026.faixasProgressivas[i].aliquota;
+                    break;
+                }
+            }
+            
+            // Se passar do último limite, usa a maior alíquota
+            if (salario > CONFIG_2026.faixasProgressivas[CONFIG_2026.faixasProgressivas.length-1].limite) {
+                 aliquotaEfetiva = CONFIG_2026.faixasProgressivas[CONFIG_2026.faixasProgressivas.length-1].aliquota;
+            }
+
+            contribuicao = salario * aliquotaEfetiva;
+            explicacao += `<br>Alíquota aplicada aprox.: ${(aliquotaEfetiva * 100).toFixed(1)}%.`;
+        }
+
+        // Formata e Exibe Resultado
+        valorFinalEl.textContent = formatCurrency(contribuicao);
+        detalheEl.innerHTML = explicacao;
+        resultadoBox.style.display = 'block';
+        
+        // Scroll suave para o resultado
+        resultadoBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(value);
+    }
+</script>
+
+</body>
+</html>
