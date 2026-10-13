@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abecedário Vivo | Modo Inclusivo</title>
+    
+    <!-- Fonte Robusta e Legível -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           DESIGN NEUROINCLUSIVO (TEA Friendly)
+           Princípios: Baixa Saturação, Alta Legibilidade, 
+           Sem Piscar, Feedback Claro.
+           ========================================= */
+        
+        :root {
+            /* Paleta Suave (Evita estímulo visual excessivo) */
+            --bg-calmo: #f0f4f8;      /* Azul acinzentado claro */
+            --painel-branco: #ffffff;
+            --texto-principal: #2d3748; /* Cinza escuro, não preto puro */
+            --texto-suave: #718096;
+            --destaque-verde: #38b2ac;  /* Verde água calmante */
+            --borda-sutil: #e2e8f0;
+            
+            /* Tipografia Acessível */
+            --fonte-base: 'Open Sans', sans-serif;
+            --tamanho-letra: 1.2rem; /* Maior que o padrão */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background-color: var(--bg-calmo);
+            color: var(--texto-principal);
+            font-family: var(--fonte-base);
+            line-height: 1.6; /* Espaçamento generoso entre linhas */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* HEADER SIMPLES E ESTÁTICO */
+        header {
+            background: var(--painel-branco);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--borda-sutil);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02); /* Sombra quase imperceptível */
+        }
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--texto-principal);
+            margin-bottom: 5px;
+        }
+        .instrucao-clara {
+            font-size: 1rem;
+            color: var(--texto-suave);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* CONTAINER PRINCIPAL */
+        main {
+            flex: 1;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* GRID DE LETRAS (Espaçado para evitar aglomeração visual) */
+        .letters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 15px; /* Espaço largo entre botões */
+            margin-bottom: 30px;
+        }
+
+        .letter-btn {
+            aspect-ratio: 1;
+            background: var(--painel-branco);
+            border: 2px solid var(--borda-sutil);
+            border-radius: 12px; /* Cantos arredondados suavizam a percepção */
+            color: var(--texto-principal);
+            font-size: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease; /* Transição lenta e previsível */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none; /* Sem sombras pesadas */
+        }
+
+        /* ESTADO HOVER/FOCUS (Claro e Óbvio) */
+        .letter-btn:hover, .letter-btn:focus {
+            border-color: var(--destaque-verde);
+            background-color: #ebf8fa; /* Fundo levemente tingido */
+            outline: none;
+        }
+
+        /* ESTADO ATIVO (Selecionado) */
+        .letter-btn.active {
+            background-color: var(--destaque-verde);
+            color: white;
+            border-color: var(--destaque-verde);
+            transform: scale(1.05); /* Crescimento sutil, não explosivo */
+        }
+
+        /* CARD DE DETALHE DA LETRA */
+        .detail-card {
+            background: var(--painel-branco);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid var(--borda-sutil);
+            animation: fadeSoft 0.5s ease forwards;
+            position: relative;
+        }
+
+        @keyframes fadeSoft {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* CONTEÚDO DO CARD */
+        .big-letter-display {
+            font-size: 5rem;
+            font-weight: 700;
+            color: var(--destaque-verde);
+            text-align: center;
+            margin-bottom: 10px;
+            line-height: 1;
+        }
+
+        .word-example {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--texto-principal);
+            text-align: center;
+            margin-bottom: 20px;
+            display: block;
+            letter-spacing: 1px;
+        }
+
+        .context-desc {
+            font-size: 1.2rem;
+            color: var(--texto-suave);
+            line-height: 1.8;
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid var(--destaque-verde);
+            text-align: left;
+        }
+
+        /* BOTÃO DE ÁUDIO VISUAL (Simulado) */
+        .audio-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 20px;
+            height: 30px;
+            align-items: center;
+        }
+        .bar {
+            width: 4px;
+            background: var(--destaque-verde);
+            border-radius: 2px;
+            animation: pulseSlow 1.5s infinite ease-in-out;
+        }
+        .bar:nth-child(odd) { animation-delay: 0.2s; }
+        
+        @keyframes pulseSlow {
+            0%, 100% { height: 10px; opacity: 0.5; }
+            50% { height: 25px; opacity: 1; }
+        }
+
+        /* RODAPÉ */
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9rem;
+            color: var(--texto-suave);
+            background: var(--painel-branco);
+            border-top: 1px solid var(--borda-sutil);
+        }
+
+        /* RESPONSIVIDADE */
+        @media (max-width: 600px) {
+            .letters-grid { grid-template-columns: repeat(4, 1fr); }
+            .big-letter-display { font-size: 4rem; }
+            .word-example { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Letras do Meu Mundo</h1>
+    <p class="instrucao-clara">Toque devagar na letra para ver a palavra e ouvir o som.</p>
+</header>
+
+<main>
+    <!-- Grid de Letras -->
+    <div id="lettersGrid" class="letters-grid"></div>
+
+    <!-- Card de Detalhe -->
+    <div id="detailCard" class="detail-card" style="display:none;">
+        <div class="big-letter-display" id="dispLetter">A</div>
+        <span class="word-example" id="dispWord">ÁRVORE</span>
+        
+        <div class="audio-indicator">
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            <div class="bar"></div><div class="bar"></div>
+        </div>
+
+        <div class="context-desc" id="dispDesc">
+            Uma árvore grande dá sombra fresca. As folhas são verdes.
+        </div>
+    </div>
+    
+    <div id="placeholderMsg" style="text-align:center; margin-top:40px; color:var(--texto-suave); font-size:1.1rem;">
+        👆 Escolha uma letra acima.
+    </div>
+</main>
+
+<footer>
+    © 2026 FamíliaHDMicro | Design Pensado para Todas as Mentes 💙
+</footer>
+
+<script>
+// DADOS SIMPLIFICADOS E CONCRETOS PARA CRIANÇAS COM TEA
+// Evitar abstração. Focar em objetos tangíveis e sensações.
+const dadosEducacionais = [
+    { l: 'A', w: 'ÁRVORE', d: 'A árvore é alta. Tem tronco marrom e folhas verdes. Dá sombra.' },
+    { l: 'B', w: 'BOLA', d: 'A bola é redonda. Você pode chutar ou jogar. Ela quica no chão.' },
+    { l: 'C', w: 'CARRO', d: 'O carro anda na rua. Tem rodas pretas. Faz barulho: Vrum!' },
+    { l: 'D', w: 'DADO', d: 'O dado é um cubo. Tem pontinhos brancos. Gire-o na mesa.' },
+    { l: 'E', w: 'ESTRELA', d: 'A estrela brilha no céu à noite. Tem cinco pontas afiadas.' },
+    { l: 'F', w: 'FLOR', d: 'A flor é bonita. Tem pétalas coloridas. Cheira bem.' },
+    { l: 'G', w: 'GATO', d: 'O gato mia. Tem bigodes longos e pelagem macia. Ele gosta de dormir.' },
+    { l: 'H', w: 'HELICÓPTERO', d: 'Helicóptero voa girando as hélices. Faz muito barulho: Tchu-tchu-tchu.' },
+    { l: 'I', w: 'ILHA', d: 'Ilha é terra cercada de água. Tem areia branca e coqueiros.' },
+    { l: 'J', w: 'JANELA', d: 'Janela abre para entrar luz. Vidro transparente. Veja lá fora.' },
+    { l: 'K', w: 'KIWI', d: 'Kiwi é fruta verde. Por dentro tem sementinhas pretas. É azedinho.' },
+    { l: 'L', w: 'LUA', d: 'A lua aparece à noite. É brilhante e amarela. Muda de forma.' },
+    { l: 'M', w: 'MACACO', d: 'Macaco sobe em árvores. Tem rabo comprido. Faz ui-uui-uui.' },
+    { l: 'N', w: 'NUVEM', d: 'Nuvem é branca e fofinha no céu. Pode trazer chuva molhada.' },
+    { l: 'O', w: 'OVO', d: 'Ovo é oval. Casca dura. Dentro tem gema amarela clara.' },
+    { l: 'P', w: 'PATO', d: 'Pato nada na lagoa. Tem bico laranja achatado. Quack-quack.' },
+    { l: 'Q', w: 'QUEIJO', d: 'Queijo é amarelo. Tem furinhos. É gostoso de comer no pão.' },
+    { l: 'R', w: 'RATO', d: 'Rato é pequeno. Tem orelhas grandes e rabo fino. Corre rápido.' },
+    { l: 'S', w: 'SOL', d: 'Sol é quente e brilhante. Nasce de manhã. Ilumina tudo.' },
+    { l: 'T', w: 'TREM', d: 'Trem anda nos trilhos. Longo e barulhento. Chuuu-chuuu.' },
+    { l: 'U', w: 'URSO', d: 'Urso é grande e peludo. Gosta de mel. Dorme no inverno.' },
+    { l: 'V', w: 'VACA', d: 'Vaca faz leite. É branca e preta. Muuuu.' },
+    { l: 'W', w: 'WEB (INTERNET)', d: 'Internet conecta pessoas. Use com cuidado e supervisão.' },
+    { l: 'X', w: 'XIQUITA', d: 'Chiquita banana? Ou Xícara? Vamos usar XILOFONE. Som metálico: Ting-ting.' }, // Ajuste cultural
+    { l: 'Y', w: 'YO-YÔ', d: 'Yo-yô sobe e desce na corda. Brinquedo divertido.' },
+    { l: 'Z', w: 'ZEBRA', d: 'Zebra tem listras pretas e brancas. Parece cavalo selvagem.' }
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderLetters();
+});
+
+function renderLetters() {
+    const grid = document.getElementById('lettersGrid');
+    grid.innerHTML = '';
+
+    dadosEducacionais.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'letter-btn';
+        btn.textContent = item.l;
+        btn.setAttribute('aria-label', `Letra ${item.l} para palavra ${item.w}`); // Acessibilidade Screen Reader
+        
+        // Evento de clique único e claro
+        btn.onclick = () => selectLetter(item, btn);
+        grid.appendChild(btn);
+    });
+}
+
+function selectLetter(data, btnElement) {
+    // Remove seleção anterior
+    document.querySelectorAll('.letter-btn').forEach(b => b.classList.remove('active'));
+    btnElement.classList.add('active');
+    
+    // Esconde placeholder
+    document.getElementById('placeholderMsg').style.display = 'none';
+    
+    // Atualiza conteúdo do card
+    const card = document.getElementById('detailCard');
+    document.getElementById('dispLetter').textContent = data.l;
+    document.getElementById('dispWord').textContent = data.w;
+    document.getElementById('dispDesc').textContent = data.d;
+    
+    // Mostra card com animação suave
+    card.style.display = 'block';
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); // Rolagem gentil
+}
+</script>
+
+</body>
+</html>
