@@ -1,139 +1,285 @@
-import os
-import json
-import time
-import requests
-from pathlib import Path
+/**
+ * SoCialBR API Router vFINAL
+ * Substitui o antigo [[path]].js completamente.
+ * Integra Rotas Originais + Novas Rotas FalaAki.
+ */
 
-# ==========================================
-# CONFIGURAÇÃO DO USUÁRIO (EDITE AQUI)
-# ==========================================
-ADMIN_TOKEN = "SEU_TOKEN_AQUI"  # Cole seu token real
-API_URL = "https://hub-ias.hdmicro-ml.workers.dev/api/projects"
+export default {
+    async fetch(request, env, ctx) {
+        const url = new URL(request.url);
+        const pathParts = url.pathname.split('/').filter(Boolean); // Remove vazios
+        
+        // Rota Base: /api/...
+        if (pathParts[0] !== 'api') {
+            return new Response('Not Found', { status: 404 });
+        }
 
-# ONDE PROCURAR SEUS PROJETOS (Adicione seus caminhos reais)
-SEARCH_PATHS = [
-    r"C:\Users\HDMICRO\Documents\Coding",
-    r"D:\Projetos",
-    r"E:\Backup_Codigo",
-    # Adicione mais caminhos conforme necessário
-]
+        const route = pathParts.slice(1).join('/'); // Ex: 'registrar', 'grupos', 'fala/posts'
+        const method = request.method;
+        
+        // Helpers Globais
+        const db = env.DB;
+        const J = (obj) => new Response(JSON.stringify(obj), { headers: { 'Content-Type': 'application/json' } });
+        const E = (msg, code = 400) => new Response(JSON.stringify({ erro: msg }), { status: code });
+        
+        // Gera ID Aleatório Simples
+        const rnd = () => Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+        
+        // Hash SHA-256 para Tokens
+        const sha = async (t) => {
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t));
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        };
 
-# EXTENSÕES QUE DEFINEM UM PROJETO
-PROJECT_EXTENSIONS = {'.py', '.js', '.ts', '.html', '.css', '.cpp', '.c', '.h', '.ino', '.java', '.rb', '.go', '.rs'}
-
-# PASTAS A IGNORAR
-IGNORE_FOLDERS = {'node_modules', '__pycache__', '.git', 'venv', 'env', '.venv', 'dist', 'build', '.next'}
-
-# ARQUIVO DE CONTROLE DE PROGRESSO (NUNCA APAGUE MANUALMENTE)
-PROGRESS_FILE = "migration_progress.json"
-
-# ==========================================
-# LÓGICA DE MIGRAÇÃO
-# ==========================================
-
-def load_progress():
-    if os.path.exists(PROGRESS_FILE):
-        with open(PROGRESS_FILE, 'r') as f:
-            return json.load(f)
-    return {"processed": [], "failed": []}
-
-def save_progress(progress):
-    with open(PROGRESS_FILE, 'w') as f:
-        json.dump(progress, f, indent=2)
-
-def is_project_folder(folder_path):
-    """Verifica se a pasta contém arquivos de código válidos."""
-    try:
-        for root, dirs, files in os.walk(folder_path, topdown=True):
-            # Remove pastas ignoradas da varredura
-            dirs[:] = [d for d in dirs if d not in IGNORE_FOLDERS]
+        // --- AUTENTICAÇÃO BÁSICA ---
+        let me = null;
+        const authHeader = request.headers.get('Authorization');
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            const tokenRaw = authHeader.substring(7);
+            const tokenHash = await sha(tokenRaw);
             
-            for file in files:
-                ext = Path(file).suffix.lower()
-                if ext in PROJECT_EXTENSIONS:
-                    return True
-    except PermissionError:
-        pass
-    return False
+            // Busca usuário pelo hash do token
+            me = await db.prepare('SELECT id, nome, tema_atual FROM users WHERE token_hash = ?').bind(tokenHash).first();
+        }
 
-def send_to_cloud(project_name, description="Migrado automaticamente"):
-    """Envia projeto para a API com retry simples."""
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {ADMIN_TOKEN}"
-    }
-    payload = {
-        "name": project_name,
-        "description": description,
-        "status_label": "Criados",  # Todos começam arquivados
-        "github_branch": ""
-    }
-    
-    for attempt in range(3):
-        try:
-            resp = requests.post(API_URL, json=payload, headers=headers, timeout=10)
-            if resp.status_code == 201:
-                return True, resp.json().get("id")
-            elif resp.status_code == 429:  # Rate limit
-                time.sleep(2)
-            else:
-                return False, resp.text
-        except Exception as e:
-            time.sleep(1)
-    return False, "Falha após 3 tentativas"
+        // Middleware: Rotas que exigem login
+        const requireAuth = () => {
+            if (!me) throw new Error('UNAUTHORIZED');
+            return me;
+        };
 
-def main():
-    print("🚀 Iniciando Migração OmniHub...")
-    progress = load_progress()
-    total_found = 0
-    total_sent = len(progress["processed"])
-    total_failed = len(progress["failed"])
+        try {
+            // ==========================================
+            // ROTAS ORIGINAIS SOCIAIBR
+            // ==========================================
 
-    for search_path in SEARCH_PATHS:
-        if not os.path.exists(search_path):
-            print(f"⚠️ Caminho não encontrado: {search_path}")
-            continue
-            
-        print(f"\n🔍 Varrendo: {search_path}")
-        for root, dirs, files in os.walk(search_path, topdown=True):
-            dirs[:] = [d for d in dirs if d not in IGNORE_FOLDERS]
-            
-            # Verifica apenas pastas de nível 1 ou 2 para evitar profundidade excessiva
-            depth = root.replace(search_path, '').count(os.sep)
-            if depth > 2: 
-                continue
+            // 1. Registrar / Login Simples (Gera Token Novo)
+            if (route === 'registrar' && method === 'POST') {
+                const body = await request.json();
+                const nome = (body.nome || '').trim();
                 
-            if is_project_folder(root):
-                folder_name = os.path.basename(root)
+                if (!nome) return E('Nome obrigatório');
+
+                // Verifica se já existe (pelo nome, simplificado)
+                // Em produção ideal seria email/cpf, mas aqui usamos nome único local
+                const existing = await db.prepare('SELECT id FROM users WHERE nome = ?').bind(nome).first();
                 
-                # Evita duplicatas
-                if folder_name in progress["processed"] or folder_name in progress["failed"]:
-                    continue
+                let userId, userToken;
+                
+                if (existing) {
+                    userId = existing.id;
+                    // Reutiliza token existente? Não, gera novo para segurança
+                    userToken = rnd() + '-' + rnd(); 
+                    const newHash = await sha(userToken);
+                    await db.prepare('UPDATE users SET token_hash = ? WHERE id = ?').bind(newHash, userId).run();
+                } else {
+                    userId = rnd();
+                    userToken = rnd() + '-' + rnd();
+                    const newHash = await sha(userToken);
                     
-                total_found += 1
-                print(f"   [+] Encontrado: {folder_name}")
-                
-                success, msg = send_to_cloud(folder_name)
-                if success:
-                    progress["processed"].append(folder_name)
-                    total_sent += 1
-                    print(f"       ✅ Enviado (ID: {msg})")
-                else:
-                    progress["failed"].append({"name": folder_name, "error": str(msg)})
-                    total_failed += 1
-                    print(f"       ❌ Falha: {msg}")
-                
-                # Salva progresso a cada envio (segurança contra quedas)
-                save_progress(progress)
-                
-                # Pequena pausa para não sobrecarregar a API
-                time.sleep(0.5)
+                    await db.prepare(`
+                        INSERT INTO users (id, nome, token_hash, tema_atual, criado_em) 
+                        VALUES (?, ?, ?, 'zumbi', ?)
+                    `).bind(userId, nome, newHash, Date.now()).run();
+                }
 
-    print(f"\n🏁 MIGRAÇÃO CONCLUÍDA!")
-    print(f"    Novos encontrados nesta execução: {total_found}")
-    print(f"   ☁️ Total enviados na nuvem: {total_sent}")
-    print(f"   ⚠️ Falhas acumuladas: {total_failed}")
-    print(f"   💾 Progresso salvo em: {PROGRESS_FILE}")
+                return J({ ok: 1, token: userToken, id: userId, nome });
+            }
 
-if __name__ == "__main__":
-    main()
+            // 2. Get Me (Perfil Atual)
+            if (route === 'eu' && method === 'GET') {
+                requireAuth();
+                return J(me);
+            }
+
+            // 3. Listar Grupos do Usuário
+            if (route === 'grupos' && method === 'GET') {
+                requireAuth();
+                
+                // Pega grupos onde ele é membro ATIVO
+                const rows = await db.prepare(`
+                    SELECT g.*, m.status as meu_status 
+                    FROM grupos g
+                    JOIN members m ON g.id = m.group_id
+                    WHERE m.user_id = ? AND m.status = 'ativo'
+                `).bind(me.id).all();
+                
+                return J(rows.results);
+            }
+
+            // 4. Criar Grupo
+            if (route === 'grupos' && method === 'POST') {
+                requireAuth();
+                const body = await request.json();
+                const { nome, tipo } = body;
+                
+                if (!nome) return E('Nome do grupo obrigatório');
+
+                const groupId = rnd();
+                const now = Date.now();
+                
+                await db.batch([
+                    db.prepare(`INSERT INTO grupos (id, nome, dono_id, status, criado_em) VALUES (?, ?, ?, 'ativo', ?)`)
+                      .bind(groupId, nome, me.id, now),
+                    db.prepare(`INSERT INTO members (group_id, user_id, entrou_em, status) VALUES (?, ?, ?, 'ativo')`)
+                      .bind(groupId, me.id, now)
+                ]);
+
+                return J({ ok: 1, id: groupId });
+            }
+
+            // 5. Gerar Convite
+            if (route.match(/^grupos\/(.+)\/convites$/) && method === 'POST') {
+                requireAuth();
+                const groupId = route.split('/')[1];
+                
+                // Valida se é dono ou admin simples (aqui assume dono)
+                const grp = await db.prepare('SELECT * FROM grupos WHERE id = ?').bind(groupId).first();
+                if (!grp || grp.dono_id !== me.id) return E('Permissão negada', 403);
+
+                const inviteId = rnd();
+                const inviteToken = rnd();
+                const expires = Date.now() + (7 * 24 * 60 * 60 * 1000); // 7 dias
+                
+                await db.prepare(`
+                    INSERT INTO invites (id, group_id, invited_by, token_hash, expira_em, status) 
+                    VALUES (?, ?, ?, ?, ?, 'novo')
+                `).bind(inviteId, groupId, me.id, await sha(inviteToken), expires).run();
+
+                return J({ ok: 1, token: inviteToken });
+            }
+
+            // 6. Aceitar Convite
+            if (route === 'convites/aceitar' && method === 'POST') {
+                requireAuth();
+                const body = await request.json();
+                const rawToken = body.token;
+                
+                if (!rawToken) return E('Token inválido');
+                const tokenHash = await sha(rawToken);
+                
+                const invite = await db.prepare('SELECT * FROM invites WHERE token_hash = ? AND status = ?').bind(tokenHash, 'novo').first();
+                
+                if (!invite) return E('Convite inválido ou já usado');
+                if (invite.expira_em < Date.now()) return E('Convite expirado');
+
+                // Insere como membro
+                try {
+                    await db.prepare(`
+                        INSERT INTO members (group_id, user_id, invited_by, entrou_em, status) 
+                        VALUES (?, ?, ?, ?, 'ativo')
+                    `).bind(invite.group_id, me.id, invite.invited_by, Date.now()).run();
+                    
+                    // Marca convite como usado
+                    await db.prepare('UPDATE invites SET status = ?, usado_por = ? WHERE id = ?')
+                        .bind('usado', me.id, invite.id).run();
+                        
+                } catch(e) {
+                     // Se já for membro, ignora erro de PK duplicate
+                     if(!e.message.includes('UNIQUE constraint failed')) throw e;
+                }
+
+                return J({ ok: 1 });
+            }
+
+
+            // ==========================================
+            // NOVAS ROTAS FALAAKI (HUB SOCIAL)
+            // ==========================================
+            
+            // Prefixo: fala/...
+
+            // 7. Listar Grupos FalaAki (Públicos/Beta)
+            if (route === 'fala/grupos' && method === 'GET') {
+                // Não exige login estrito para listar abertos, mas filtra membros ativos
+                const rows = await db.prepare(`
+                    SELECT fg.*, COUNT(fm.user_ref) as total_membros 
+                    FROM fala_grupos fg
+                    LEFT JOIN fala_membros fm ON fg.id = fm.group_id AND fm.status = 'ativo'
+                    WHERE fg.status = 'ativo'
+                    GROUP BY fg.id
+                `).all();
+                return J(rows.results);
+            }
+
+            // 8. Entrar em Grupo FalaAki (Auto-Join se aberto)
+            if (route === 'fala/join' && method === 'POST') {
+                requireAuth(); // Precisa ter conta no sistema principal
+                const body = await request.json();
+                const gid = body.group_id;
+                
+                const grp = await db.prepare('SELECT * FROM fala_grupos WHERE id = ?').bind(gid).first();
+                if (!grp) return E('Grupo não encontrado');
+                if (grp.tipo !== 'aberto') return E('Este grupo é fechado');
+
+                // Tenta inserir membro
+                try {
+                    await db.prepare(`
+                        INSERT INTO fala_membros (group_id, user_ref, entrou_em, status) 
+                        VALUES (?, ?, ?, 'ativo')
+                    `).bind(gid, me.id, Date.now()).run();
+                } catch(e) {
+                    if(!e.message.includes('UNIQUE constraint failed')) throw e;
+                }
+                
+                return J({ ok: 1 });
+            }
+
+            // 9. Postar no FalaAki
+            if (route === 'fala/posts' && method === 'POST') {
+                requireAuth();
+                const body = await request.json();
+                const { group_id, conteudo } = body;
+                
+                if (!group_id || !conteudo) return E('Dados incompletos');
+                
+                // Verifica se é membro
+                const isMember = await db.prepare('SELECT 1 FROM fala_membros WHERE group_id = ? AND user_ref = ? AND status = ?')
+                    .bind(group_id, me.id, 'ativo').first();
+                
+                if (!isMember) return E('Você não faz parte deste grupo.', 403);
+
+                const postId = rnd();
+                await db.prepare(`
+                    INSERT INTO fala_posts (id, group_id, autor_ref, conteudo, tipo_conteudo, criado_em) 
+                    VALUES (?, ?, ?, ?, 'texto', ?)
+                `).bind(postId, group_id, me.id, conteudo.slice(0, 2000), Date.now()).run();
+
+                return J({ ok: 1, id: postId });
+            }
+
+            // 10. Ler Posts do FalaAki
+            if (route.match(/^fala\/posts\/(.+)$/) && method === 'GET') {
+                requireAuth();
+                const gid = route.split('/')[2];
+                
+                // Verifica membresia
+                 const isMember = await db.prepare('SELECT 1 FROM fala_membros WHERE group_id = ? AND user_ref = ? AND status = ?')
+                    .bind(gid, me.id, 'ativo').first();
+                if (!isMember) return E('Acesso restrito', 403);
+
+                const rows = await db.prepare(`
+                    SELECT fp.id, fp.conteudo, fp.criado_em, u.nome as autor_nome 
+                    FROM fala_posts fp
+                    JOIN users u ON fp.autor_ref = u.id
+                    WHERE fp.group_id = ?
+                    ORDER BY fp.criado_em DESC
+                    LIMIT 50
+                `).bind(gid).all();
+                
+                return J(rows.results);
+            }
+
+
+            // FALLBACK
+            return E('Rota não encontrada: ' + route, 404);
+
+        } catch (err) {
+            console.error(err);
+            if (err.message === 'UNAUTHORIZED') {
+                return E('Entre primeiro', 401);
+            }
+            return E('Erro interno: ' + err.message, 500);
+        }
+    }
+};
